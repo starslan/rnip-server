@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+		   targetNamespace="urn://rnip.mos.ru/xsd/services/ExportNotice/2.6.0"
+		   xmlns:nc="http://rnip.mos.ru/xsd/NoticeCharge/2.6.0"
+		   xmlns:pmnt="http://rnip.mos.ru/xsd/Payment/2.6.0"
+		   xmlns:qt="http://rnip.mos.ru/xsd/Quittance/2.6.0"
+		   xmlns:inc="http://rnip.mos.ru/xsd/Income/2.6.0"
+		   xmlns:rn="http://rnip.mos.ru/xsd/Renouncement/2.6.0"
+		   xmlns:pt="http://rnip.mos.ru/xsd/NoticeParticipant/2.6.0"
+>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0"
+			   schemaLocation="commons/Common.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Payment/2.6.0"
+			   schemaLocation="commons/Payment.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Quittance/2.6.0"
+			   schemaLocation="commons/Quittance.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/NoticeCharge/2.6.0"
+			   schemaLocation="commons/NoticeCharge.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Subscription/2.6.0"
+			   schemaLocation="commons/Subscription.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Renouncement/2.6.0" schemaLocation="commons/Renouncement.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Income/2.6.0" schemaLocation="commons/Income.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/NoticeParticipant/2.6.0"
+			   schemaLocation="commons/NoticeParticipant.xsd"/>
+
+	<xs:element name="ExportNoticeRequest">
+		<xs:annotation>
+			<xs:documentation>Предоставление из ИС РНиП уведомлений по подписке</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Destination">
+					<xs:annotation>
+						<xs:documentation>Идентификаторы получателя уведомлений по подписке</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:attribute name="recipientIdentifier" type="com:URNType" use="required">
+							<xs:annotation>
+								<xs:documentation>УРН участника получателя</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+				<xs:choice maxOccurs="100">
+					<xs:element name="NoticeCharge" type="nc:NoticeChargeType">
+						<xs:annotation>
+							<xs:documentation>Уведомления о начислении, уточнении или аннулировании начисления
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="NoticeChargeExecutive" type="nc:NoticeChargeExecutiveType">
+						<xs:annotation>
+							<xs:documentation>Уведомления о неуплате начисления в установленный законодательством срок
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="NoticePayment">
+						<xs:annotation>
+							<xs:documentation>Уведомления о поступившем платеже, уточнении или аннулировании платежа
+							</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:complexContent>
+								<xs:extension base="pmnt:PaymentType">
+									<xs:sequence>
+										<xs:element name="IncomeInfo" type="com:IncomeInfoType" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Сведения о сопоставлении платежа и зачисления
+												</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="EventPaymentsNotification" type="com:EventNotificationType"
+													minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Код события для направления уведомлении о платеже
+												</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+									<xs:attribute name="external" type="xs:boolean">
+										<xs:annotation>
+											<xs:documentation>Признак поступления уведомления из ГИС ГМП
+											</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+								</xs:extension>
+							</xs:complexContent>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="NoticeQuittance">
+						<xs:annotation>
+							<xs:documentation>Уведомления о формировании квитанции</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:complexContent>
+								<xs:extension base="qt:QuittanceType">
+									<xs:attribute name="external" type="xs:boolean">
+										<xs:annotation>
+											<xs:documentation>Признак поступления уведомления из ГИС ГМП
+											</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+								</xs:extension>
+							</xs:complexContent>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="NoticeRenouncement">
+						<xs:annotation>
+							<xs:documentation>Уведомление о поступившем извещении об отказе в возбуждении
+								исполнительного производства
+							</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:complexContent>
+								<xs:extension base="rn:RenouncementType">
+									<xs:attribute name="external" type="xs:boolean">
+										<xs:annotation>
+											<xs:documentation>Признак поступления уведомления из ГИС ГМП
+											</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+								</xs:extension>
+							</xs:complexContent>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="NoticeIncome">
+						<xs:annotation>
+							<xs:documentation>Уведомления о поступившем зачислении, уточнении или аннулировании
+								зачисления
+							</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:complexContent>
+								<xs:extension base="inc:IncomeType">
+									<xs:attribute name="receiptPaymentStatus" type="com:receiptPaymentStatusType"
+												  use="required">
+										<xs:annotation>
+											<xs:documentation>Статус сопоставления зачисления и платежа
+											</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+									<xs:attribute name="external" type="xs:boolean">
+										<xs:annotation>
+											<xs:documentation>Признак поступления уведомления из ГИС ГМП
+											</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+								</xs:extension>
+							</xs:complexContent>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="NoticeParticipant" type="pt:NoticeParticipantType">
+						<xs:annotation>
+							<xs:documentation>Уведомление об изменении или регистрации косвенных участников
+								взаимодействия
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+			<xs:attribute name="Id" use="required">
+				<xs:annotation>
+					<xs:documentation>Идентификатор запроса</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:ID">
+						<xs:maxLength value="50"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="timestamp" type="xs:dateTime" use="required">
+				<xs:annotation>
+					<xs:documentation>Дата и время формирования сообщения</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ExportNoticeResponse">
+		<xs:annotation>
+			<xs:documentation>Ответ на запрос предоставления из ИС РНиП уведомлений по подписке</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:ResponseType">
+					<xs:sequence>
+						<xs:element name="ExportNoticeConfirmation" type="xs:boolean">
+							<xs:annotation>
+								<xs:documentation>Подтверждение приема сообщения с рассылкой уведомлений по подписке:
+									true - сообщение принято;
+									false - отказ в приеме сообщения
+								</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+		   xmlns="http://rnip.mos.ru/xsd/NoticeParticipant/2.6.0"
+		   targetNamespace="http://rnip.mos.ru/xsd/NoticeParticipant/2.6.0" elementFormDefault="qualified"
+>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0" schemaLocation="Common.xsd"/>
+	<xs:complexType name="ParticipantInfoType">
+		<xs:annotation>
+			<xs:documentation>Сведения об участнике
+			</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="urn" type="com:URNType" use="required">
+			<xs:annotation>
+				<xs:documentation>УРН участника</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="name" use="required">
+			<xs:annotation>
+				<xs:documentation>Наименование организации</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:maxLength value="2000"/>
+					<xs:pattern value="[^\s]+(\s+[^\s]+)*"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="inn" type="com:INNAllType" use="required">
+			<xs:annotation>
+				<xs:documentation>ИНН организации</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="kpp" type="com:KPPType">
+			<xs:annotation>
+				<xs:documentation>КПП организации</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="ogrn" type="com:OGRNType">
+			<xs:annotation>
+				<xs:documentation>ОГРН организации</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="AuthorityInfoType">
+		<xs:annotation>
+			<xs:documentation>Сведения о полномочиях участника</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="authority" use="required">
+			<xs:annotation>
+				<xs:documentation>Полномочие участника</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:maxLength value="10"/>
+					<xs:pattern value="\w{1,10}"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="statusAuthority" use="required">
+			<xs:annotation>
+				<xs:documentation>Статус полномочия</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:minLength value="1"/>
+					<xs:maxLength value="2"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="registerAuthority" type="xs:date" use="required">
+			<xs:annotation>
+				<xs:documentation>Дата регистрация полномочия</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="changeAuthority" type="xs:date">
+			<xs:annotation>
+				<xs:documentation>Дата смены статуса полномочия</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="NoticeParticipantType">
+		<xs:annotation>
+			<xs:documentation>Уведомление об изменении или регистрации косвенного участника</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ParticipantInfo">
+				<xs:annotation>
+					<xs:documentation>Сведения об участнике</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="ParticipantInfoType">
+							<xs:sequence>
+								<xs:element name="AuthorityInfo" maxOccurs="10">
+									<xs:annotation>
+										<xs:documentation>Сведения о полномочиях участника</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:complexContent>
+											<xs:extension base="AuthorityInfoType">
+												<xs:sequence>
+													<xs:element name="AssignInfo" minOccurs="0" maxOccurs="10">
+														<xs:annotation>
+															<xs:documentation>Сведение о правопреемнике
+															</xs:documentation>
+														</xs:annotation>
+														<xs:complexType>
+															<xs:complexContent>
+																<xs:extension base="ParticipantInfoType">
+																	<xs:sequence>
+																		<xs:element name="AssignAuthorityInfo"
+																					type="AuthorityInfoType">
+																			<xs:annotation>
+																				<xs:documentation>Сведения о полномочие
+																					правопреемника
+																				</xs:documentation>
+																			</xs:annotation>
+																		</xs:element>
+																	</xs:sequence>
+																</xs:extension>
+															</xs:complexContent>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:extension>
+										</xs:complexContent>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="eventParticipantNotification" use="required">
+			<xs:annotation>
+				<xs:documentation>Код события для направления уведомления</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="com:EventNotificationType">
+					<xs:minLength value="1"/>
+					<xs:maxLength value="2"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="external" type="xs:boolean">
+			<xs:annotation>
+				<xs:documentation>Признак поступления уведомления из ГИС ГМП</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+</xs:schema>

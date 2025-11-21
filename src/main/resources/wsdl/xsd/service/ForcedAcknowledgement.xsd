@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+		   xmlns:qt="http://rnip.mos.ru/xsd/Quittance/2.6.0"
+		   xmlns:ack="urn://rnip.mos.ru/xsd/services/forced-acknowledgement/2.6.0"
+		   targetNamespace="urn://rnip.mos.ru/xsd/services/forced-acknowledgement/2.6.0">
+	<xs:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0" schemaLocation="commons/Common.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Quittance/2.6.0" schemaLocation="commons/Quittance.xsd"/>
+	<xs:element name="ForcedAcknowledgementRequest">
+		<xs:annotation>
+			<xs:documentation>Запрос на проведение (отмену) принудительного квитирования/установление (отмену факта
+				установления)
+				извещению о приеме к исполнению распоряжения статуса "Услуга предоставлена"
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:RequestType">
+					<xs:choice>
+						<xs:element name="Reconcile" maxOccurs="100">
+							<xs:annotation>
+								<xs:documentation>Принудительное квитирование начисления с платежами</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:choice>
+									<xs:sequence>
+										<xs:element name="PaymentId" type="com:PaymentIdType" maxOccurs="100">
+											<xs:annotation>
+												<xs:documentation>УПНО</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+									<xs:element name="PaymentNotLoaded" fixed="true">
+										<xs:annotation>
+											<xs:documentation>Появляется при квитировании с отсутствующим
+												платежом
+											</xs:documentation>
+										</xs:annotation>
+										<xs:complexType>
+											<xs:simpleContent>
+												<xs:extension base="xs:boolean">
+													<xs:attribute name="amountReconcile" type="xs:unsignedLong">
+														<xs:annotation>
+															<xs:documentation>Сумма погашения, в копейках
+															</xs:documentation>
+														</xs:annotation>
+													</xs:attribute>
+												</xs:extension>
+											</xs:simpleContent>
+										</xs:complexType>
+									</xs:element>
+								</xs:choice>
+								<xs:attribute name="supplierBillId" use="required">
+									<xs:annotation>
+										<xs:documentation>УИН</xs:documentation>
+									</xs:annotation>
+									<xs:simpleType>
+										<xs:union memberTypes="com:SupplierBillIDType">
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:union>
+									</xs:simpleType>
+								</xs:attribute>
+								<xs:attribute name="Id" type="xs:ID" use="required"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="AnnulmentReconcile" maxOccurs="100">
+							<xs:annotation>
+								<xs:documentation>Отмена принудительного квитирования начисления с платежами
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:choice>
+									<xs:sequence>
+										<xs:element name="PaymentId" type="com:PaymentIdType" maxOccurs="100">
+											<xs:annotation>
+												<xs:documentation>УПНО</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+									<xs:element name="PaymentNotLoaded" fixed="true">
+										<xs:annotation>
+											<xs:documentation>Появляется при квитировании с отсутствующим
+												платежом
+											</xs:documentation>
+										</xs:annotation>
+										<xs:complexType>
+											<xs:simpleContent>
+												<xs:extension base="xs:boolean">
+													<xs:attribute name="reconcileID" type="com:reconcileIDType">
+														<xs:annotation>
+															<xs:documentation>Номер операции принудительного
+																квитирования начисления с отсутствующим в ГИС ГМП
+																платежом (частичное погашение)
+															</xs:documentation>
+														</xs:annotation>
+													</xs:attribute>
+												</xs:extension>
+											</xs:simpleContent>
+										</xs:complexType>
+									</xs:element>
+								</xs:choice>
+								<xs:attribute name="supplierBillId" use="required">
+									<xs:annotation>
+										<xs:documentation>УИН</xs:documentation>
+									</xs:annotation>
+									<xs:simpleType>
+										<xs:union memberTypes="com:SupplierBillIDType">
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:union>
+									</xs:simpleType>
+								</xs:attribute>
+								<xs:attribute name="Id" type="xs:ID" use="required"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="ServiceProvided">
+							<xs:annotation>
+								<xs:documentation>Установление платежу признака "Услуга предоставлена"
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="PaymentDataInfo" maxOccurs="100">
+										<xs:annotation>
+											<xs:documentation>Информация о платеже</xs:documentation>
+										</xs:annotation>
+										<xs:complexType>
+											<xs:sequence minOccurs="0">
+												<xs:element name="ServiceData" type="com:ServiceDataType">
+													<xs:annotation>
+														<xs:documentation>Дополнительные сведения о предоставлении
+															услуги/ об учете платежа
+														</xs:documentation>
+													</xs:annotation>
+												</xs:element>
+											</xs:sequence>
+											<xs:attribute name="paymentId" type="com:PaymentIdType" use="required">
+												<xs:annotation>
+													<xs:documentation>УПНО</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="AnnulmentServiceProvided">
+							<xs:annotation>
+								<xs:documentation>Отмена факта установления платежу признака "Услуга
+									предоставлена"
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="PaymentDataID" maxOccurs="100">
+										<xs:annotation>
+											<xs:documentation>Сведения об идентификаторах платежа</xs:documentation>
+										</xs:annotation>
+										<xs:complexType>
+											<xs:attribute name="paymentId" type="com:PaymentIdType" use="required">
+												<xs:annotation>
+													<xs:documentation>УПНО</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute name="serviceDataID" type="com:serviceDataIDType">
+												<xs:annotation>
+													<xs:documentation>Идентификатор информации об учете факта оплаты.
+														Заполняется в случае отмены частичного учета факта оплаты.
+													</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="ExcludeQuittance">
+							<xs:annotation>
+								<xs:documentation>Исключение из автоматического квитирования платежа с начислением
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="PaymentId" type="com:PaymentIdType" maxOccurs="100">
+										<xs:annotation>
+											<xs:documentation>УПНО</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+								</xs:sequence>
+								<xs:attribute name="supplierBillId" use="required">
+									<xs:annotation>
+										<xs:documentation>УИН</xs:documentation>
+									</xs:annotation>
+									<xs:simpleType>
+										<xs:union memberTypes="com:SupplierBillIDType">
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:union>
+									</xs:simpleType>
+								</xs:attribute>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="AnnulmentExcludeQuittance">
+							<xs:annotation>
+								<xs:documentation>Включение в автоматическое квитирование платежа с начислением
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="PaymentId" type="com:PaymentIdType" maxOccurs="100">
+										<xs:annotation>
+											<xs:documentation>УПНО</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+								</xs:sequence>
+								<xs:attribute name="supplierBillId" use="required">
+									<xs:annotation>
+										<xs:documentation>УИН</xs:documentation>
+									</xs:annotation>
+									<xs:simpleType>
+										<xs:union memberTypes="com:SupplierBillIDType">
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:union>
+									</xs:simpleType>
+								</xs:attribute>
+							</xs:complexType>
+						</xs:element>
+					</xs:choice>
+					<xs:attribute name="originatorId" type="com:URNType">
+						<xs:annotation>
+							<xs:documentation>УРН участника косвенного взаимодействия, сформировавшего запрос
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ForcedAcknowledgementResponse">
+		<xs:annotation>
+			<xs:documentation>Ответ на запрос на проведение (отмену) принудительного квитирования/установление (отмену
+				факта
+				установления) извещению о приеме к исполнению распоряжения статуса "Услуга предоставлена"
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:ResponseType">
+					<xs:choice>
+						<xs:sequence>
+							<xs:element name="ForcedAcknowledgementItemResponse" maxOccurs="100">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:choice>
+											<xs:sequence>
+												<xs:element name="Quittance" maxOccurs="100">
+													<xs:annotation>
+														<xs:documentation>Результат принудительного квитирования
+															(квитанция)
+														</xs:documentation>
+													</xs:annotation>
+													<xs:complexType>
+														<xs:complexContent>
+															<xs:extension base="qt:QuittanceType">
+																<xs:attribute name="reconcileID"
+																			  type="com:reconcileIDType">
+																	<xs:annotation>
+																		<xs:documentation>Номер операции принудительного
+																			квитирования
+																			начисления с отсутствующим в ГИС ГМП
+																			платежом
+																		</xs:documentation>
+																	</xs:annotation>
+																</xs:attribute>
+															</xs:extension>
+														</xs:complexContent>
+													</xs:complexType>
+												</xs:element>
+											</xs:sequence>
+											<xs:element name="Error">
+												<xs:complexType>
+													<xs:attribute name="code" type="xs:string"/>
+													<xs:attribute name="message" type="xs:string"/>
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="Done" type="ack:ForcedAckDoneType" fixed="true"
+														maxOccurs="100"/>
+										</xs:choice>
+									</xs:sequence>
+									<xs:attribute name="Id" type="xs:ID" use="required"/>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="Done" type="ack:ForcedAckDoneType" fixed="true" maxOccurs="100"/>
+					</xs:choice>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="ForcedAckDoneType">
+		<xs:annotation>
+			<xs:documentation>Содержит результат выполнения следующих операций: - Отмена
+				принудительного квитирования начисления с платежами; - Установление платежу признака
+				"Услуга
+				предоставлена"; - Отмена факта установления платежу признака "Услуга
+				предоставлена".
+			</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="xs:boolean">
+				<xs:attribute name="serviceDataID"
+							  type="com:serviceDataIDType">
+					<xs:annotation>
+						<xs:documentation>Идентификатор информации об учете платежа
+
+							Присутствует в случае указания в запросе на установление платежу
+							признака «Услуга предоставлена» блока данных «Дополнительные
+							сведения о предоставлении услуги/об учете платежа»
+						</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="paymentId" type="com:PaymentIdType">
+					<xs:annotation>
+						<xs:documentation>УПНО (УИП)
+
+							Присутствует в случае указания в запросе на установление платежу
+							признака «Услуга предоставлена» блока данных «Дополнительные
+							сведения о предоставлении услуги/об учете платежа»
+						</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="code">
+					<xs:annotation>
+						<xs:documentation>Код результата обработки</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:maxLength value="32"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+</xs:schema>

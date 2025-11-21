@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+		   xmlns:sc="http://rnip.mos.ru/xsd/SearchConditions/2.6.0"
+		   xmlns:chg="http://rnip.mos.ru/xsd/Charge/2.6.0"
+		   targetNamespace="urn://rnip.mos.ru/xsd/services/export-charges/2.6.0"
+		   xmlns="urn://rnip.mos.ru/xsd/services/export-charges/2.6.0">
+
+	<xs:import namespace="http://rnip.mos.ru/xsd/Charge/2.6.0" schemaLocation="commons/Charge.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0" schemaLocation="commons/Common.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/SearchConditions/2.6.0"
+			   schemaLocation="commons/SearchConditions.xsd"/>
+	<xs:element name="ExportChargesRequest">
+		<xs:annotation>
+			<xs:documentation>Запрос на предоставление необходимой для уплаты информации (начисления)</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:ExportRequestType">
+					<xs:sequence>
+						<xs:element minOccurs="0" name="EsiaUserInfo" type="com:EsiaUserInfoType">
+							<xs:annotation>
+								<xs:documentation>Информация, подтверждающая аутентификацию плательщика (пользователя) в
+									ЕСИА.
+									Даннный блок заполняется при запросе по идентификатору плательщика на предоставление
+									извещений
+									о начислениях, администрируемых налоговыми органами Российской Федерации.
+								</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element ref="sc:ChargesExportConditions">
+							<xs:annotation>
+								<xs:documentation>Условия для предоставления необходимой для уплаты информации
+								</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="external" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Внешний запрос в СМЭВ-3 (ГИС ГМП)</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+					<xs:attribute name="includeTaxes">
+						<xs:annotation>
+							<xs:documentation>Признак предоставляемой информации:
+								0 - предоставление информации, необходимой для уплаты денежных средств в бюджетную
+								систему РФ, за исключением начислений, администрируемых налоговыми органами Российской
+								Федерации
+								1 - предоставление информации о начислениях, администрируемых налоговыми органами
+								Российской Федерации
+							</xs:documentation>
+						</xs:annotation>
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:length value="1"/>
+								<xs:enumeration value="0">
+									<xs:annotation>
+										<xs:documentation>Новый</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="1">
+									<xs:annotation>
+										<xs:documentation>Уточнение</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ExportChargesResponse">
+		<xs:annotation>
+			<xs:documentation>Ответ на запрос предоставления необходимой для уплаты информации (начисления)
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:ResponseType">
+					<xs:choice minOccurs="0">
+						<xs:element name="ChargeInfo" maxOccurs="100">
+							<xs:annotation>
+								<xs:documentation>Извещение о начислении (начисление)</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:complexContent>
+									<xs:extension base="chg:ChargeType">
+										<xs:sequence>
+											<xs:element maxOccurs="100" minOccurs="0"
+														name="ReconcileWithoutPayment">
+												<xs:annotation>
+													<xs:documentation>Сведения о фактах погашения начисления без
+														платежа
+													</xs:documentation>
+												</xs:annotation>
+												<xs:complexType>
+													<xs:attribute name="reconcileID"
+																  type="com:reconcileIDType" use="required">
+														<xs:annotation>
+															<xs:documentation>Номер операции принудительного
+																квитирования начисления с отсутствующим в ГИС ГМП
+																платежом
+															</xs:documentation>
+														</xs:annotation>
+													</xs:attribute>
+													<xs:attribute name="amountReconcile"
+																  type="xs:unsignedLong" use="required">
+														<xs:annotation>
+															<xs:documentation>Сумма операции принудительного
+																квитирования начисления с отсутствующим в ГИС ГМП
+																платежом
+															</xs:documentation>
+														</xs:annotation>
+													</xs:attribute>
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="ChargeDetails" type="com:ChargeDetailsType" minOccurs="0">
+												<xs:annotation>
+													<xs:documentation>Расширенная информация о подлежащей к уплате сумме
+														средств
+													</xs:documentation>
+												</xs:annotation>
+											</xs:element>
+											<xs:element name="ExcludePayments" minOccurs="0">
+												<xs:annotation>
+													<xs:documentation>Сведения о платежах, исключенных из процедуры
+														автоматического квитирования с начислением
+													</xs:documentation>
+												</xs:annotation>
+												<xs:complexType>
+													<xs:sequence>
+														<xs:element name="PaymentId" type="com:PaymentIdType"
+																	maxOccurs="unbounded">
+															<xs:annotation>
+																<xs:documentation>УПНО</xs:documentation>
+															</xs:annotation>
+														</xs:element>
+													</xs:sequence>
+												</xs:complexType>
+											</xs:element>
+										</xs:sequence>
+										<xs:attribute name="amountToPay" type="xs:long" use="required">
+											<xs:annotation>
+												<xs:documentation>Остаток суммы подлежащей оплате, указанной в
+													начислении (в
+													копейках). При переплате начисления принимает отрицательное
+													значение; при
+													полной оплате — значение «0».
+												</xs:documentation>
+											</xs:annotation>
+										</xs:attribute>
+										<xs:attribute name="acknowledgmentStatus" type="com:AcknowledgmentStatusType">
+											<xs:annotation>
+												<xs:documentation>Статус присвоенный начислению при создании квитанции
+												</xs:documentation>
+											</xs:annotation>
+										</xs:attribute>
+										<xs:attribute name="requisiteCheckCode" type="com:RequisiteCheckCodeType">
+											<xs:annotation>
+												<xs:documentation>КПР или код и описание ошибки</xs:documentation>
+											</xs:annotation>
+										</xs:attribute>
+									</xs:extension>
+								</xs:complexContent>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="ChargeOffense" maxOccurs="100">
+							<xs:annotation>
+								<xs:documentation>Дополнительная информация административного правонарушения,
+									зафиксированного специальными техническими средствами, работающими в автоматическом
+									режиме
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element ref="chg:AdditionalOffense"/>
+								</xs:sequence>
+								<xs:attribute name="supplierBillID" type="com:SupplierBillIDType" use="required">
+									<xs:annotation>
+										<xs:documentation>УИН</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+							</xs:complexType>
+						</xs:element>
+					</xs:choice>
+					<xs:attribute form="unqualified" name="hasMore" type="xs:boolean" use="required">
+						<xs:annotation>
+							<xs:documentation>Признак конца выборки: false - достигнут конец выборки; true - после
+								последнего
+								предоставленного элемента в выборке имеются другие.
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+					<xs:attribute name="needReRequest" type="xs:boolean" default="false">
+						<xs:annotation>
+							<xs:documentation>Признак необходимости направления повторного запроса. Присутствует в
+								ответе, если
+								для предоставления ответа на запроос потребовалось зайдействовать внешнюю систему и
+								ответ от нее
+								не был получен (внешняя система недоступна либо получено сообщение об ошибке)
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:rfnd="http://rnip.mos.ru/xsd/Refund/2.6.0"
+		   xmlns:pkg="http://rnip.mos.ru/xsd/Package/2.6.0"
+		   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		   xmlns:chg="http://rnip.mos.ru/xsd/Charge/2.6.0" xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+		   xmlns:pmnt="http://rnip.mos.ru/xsd/Payment/2.6.0" xmlns="http://rnip.mos.ru/xsd/Package/2.6.0"
+		   targetNamespace="http://rnip.mos.ru/xsd/Package/2.6.0" elementFormDefault="qualified">
+
+	<xs:import namespace="http://rnip.mos.ru/xsd/Charge/2.6.0" schemaLocation="Charge.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0" schemaLocation="Common.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Payment/2.6.0" schemaLocation="Payment.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Refund/2.6.0" schemaLocation="Refund.xsd"/>
+	<xs:complexType name="PackageType">
+		<xs:choice>
+			<xs:element maxOccurs="100" name="ImportedCharge" type="pkg:ImportedChargeType">
+				<xs:annotation>
+					<xs:documentation>Направляемое начисление</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element maxOccurs="100" name="ImportedPayment" type="pkg:ImportedPaymentType">
+				<xs:annotation>
+					<xs:documentation>Направляемый платеж</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element maxOccurs="100" name="ImportedRefund" type="pkg:ImportedRefundType">
+				<xs:annotation>
+					<xs:documentation>Направляемый возврат</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="ImportedChargeType">
+		<xs:complexContent>
+			<xs:extension base="chg:ChargeType">
+				<xs:attribute name="originatorId" type="com:URNType">
+					<xs:annotation>
+						<xs:documentation>УРН участника косвенного взаимодействия, сформировавшего
+							запрос
+						</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="Id" use="required">
+					<xs:annotation>
+						<xs:documentation>Идентификатор начисления в пакете</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:ID">
+							<xs:maxLength value="50"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="ImportedPaymentType">
+		<xs:complexContent>
+			<xs:extension base="pmnt:PaymentType">
+				<xs:attribute name="originatorId" type="com:URNType">
+					<xs:annotation>
+						<xs:documentation>УРН участника косвенного взаимодействия, сформировавшего
+							запрос
+						</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="Id" use="required">
+					<xs:annotation>
+						<xs:documentation>Идентификатор платежа в пакете</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:ID">
+							<xs:maxLength value="50"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+				<xs:attribute name="paymentMethod">
+					<xs:annotation>
+						<xs:documentation>Способ оплаты начисления.</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="1">
+								<xs:annotation>
+									<xs:documentation>1 - Признак оплаты начисления через СБП.</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+				<xs:attribute name="requisiteCheckCode" type="com:RequisiteCheckCodeType">
+					<xs:annotation>
+						<xs:documentation>КПР</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="ImportedRefundType">
+		<xs:complexContent>
+			<xs:extension base="rfnd:RefundType">
+				<xs:attribute name="originatorId" type="com:URNType">
+					<xs:annotation>
+						<xs:documentation>УРН участника косвенного взаимодействия, сформировавшего запрос
+						</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="Id" use="required">
+					<xs:annotation>
+						<xs:documentation>Идентификатор возвтата в пакете</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:ID">
+							<xs:maxLength value="50"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="ChargesPackage">
+		<xs:annotation>
+			<xs:documentation>Пакет содержащий импортируемые начисления</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:restriction base="pkg:PackageType">
+					<xs:choice>
+						<xs:element maxOccurs="100" name="ImportedCharge" type="pkg:ImportedChargeType">
+							<xs:annotation>
+								<xs:documentation>Направляемое начисление</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:choice>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PaymentsPackage">
+		<xs:annotation>
+			<xs:documentation>Пакет, содержащий направляемые платежи</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:restriction base="pkg:PackageType">
+					<xs:sequence>
+						<xs:element maxOccurs="100" name="ImportedPayment" type="pkg:ImportedPaymentType">
+							<xs:annotation>
+								<xs:documentation>Направляемый платеж</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RefundsPackage">
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:restriction base="pkg:PackageType">
+					<xs:choice>
+						<xs:element maxOccurs="100" name="ImportedRefund" type="pkg:ImportedRefundType">
+							<xs:annotation>
+								<xs:documentation>Направляемый возврат</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:choice>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

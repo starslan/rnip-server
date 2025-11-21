@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+		   xmlns:pmnt="http://rnip.mos.ru/xsd/Payment/2.6.0"
+		   xmlns:sc="http://rnip.mos.ru/xsd/SearchConditions/2.6.0"
+		   targetNamespace="urn://rnip.mos.ru/xsd/services/export-payments/2.6.0"
+		   xmlns="urn://rnip.mos.ru/xsd/services/export-payments/2.6.0">
+	<xs:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0" schemaLocation="commons/Common.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Payment/2.6.0" schemaLocation="commons/Payment.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/SearchConditions/2.6.0"
+			   schemaLocation="commons/SearchConditions.xsd"/>
+	<xs:element name="ExportPaymentsRequest">
+		<xs:annotation>
+			<xs:documentation>Запрос на предоставление информации об уплате</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:ExportRequestType">
+					<xs:sequence>
+						<xs:element ref="sc:PaymentsExportConditions">
+							<xs:annotation>
+								<xs:documentation>Условия для предоставления информации об уплате</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="external" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Внешний запрос в СМЭВ-3 (ГИС ГМП)</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ExportPaymentsResponse">
+		<xs:annotation>
+			<xs:documentation>Ответ на запрос предоставления информации об уплате</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:ResponseType">
+					<xs:sequence minOccurs="0">
+						<xs:element name="PaymentInfo" maxOccurs="100">
+							<xs:annotation>
+								<xs:documentation>Извещение о приеме к исполнению распоряжения (платеж)
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:complexContent>
+									<xs:extension base="pmnt:PaymentType">
+										<xs:sequence>
+											<xs:element minOccurs="0" name="AcknowledgmentInfo">
+												<xs:annotation>
+													<xs:documentation>Обозначение факта квитирования платежа с
+														начисление либо
+														признака у платежа "Услуга предоставлена"
+													</xs:documentation>
+												</xs:annotation>
+												<xs:complexType>
+													<xs:choice>
+														<xs:element name="SupplierBillID"
+																	type="com:SupplierBillIDType">
+															<xs:annotation>
+																<xs:documentation>УИН, с которым сквитирован платеж
+																</xs:documentation>
+															</xs:annotation>
+														</xs:element>
+														<xs:element name="ServiceProvidedInfo">
+															<xs:annotation>
+																<xs:documentation>Информации об установлении платежу
+																	признака "Услуга предоставлена"
+																</xs:documentation>
+															</xs:annotation>
+															<xs:complexType>
+																<xs:sequence minOccurs="0">
+																	<xs:element name="AdditionalRepaymentInfo">
+																		<xs:annotation>
+																			<xs:documentation>Дополнительные сведения о
+																				погашении платежа.
+
+																				Указывается в случае частичного учета
+																				платежа.
+																			</xs:documentation>
+																		</xs:annotation>
+																		<xs:complexType>
+																			<xs:sequence>
+																				<xs:element maxOccurs="100"
+																							name="ServiceData">
+																					<xs:annotation>
+																						<xs:documentation>Дополнительные
+																							сведения о предоставлении
+																							услуги/ об учете платежа
+																						</xs:documentation>
+																					</xs:annotation>
+																					<xs:complexType>
+																						<xs:complexContent>
+																							<xs:extension
+																									base="com:ServiceDataType">
+																								<xs:attribute
+																										name="serviceDataID"
+																										type="com:serviceDataIDType"
+																										use="required">
+																									<xs:annotation>
+																										<xs:documentation>
+																											Идентификатор
+																											информации
+																											об учете
+																											платежа
+																										</xs:documentation>
+																									</xs:annotation>
+																								</xs:attribute>
+																							</xs:extension>
+																						</xs:complexContent>
+																					</xs:complexType>
+																				</xs:element>
+																			</xs:sequence>
+																			<xs:attribute name="residualAmount "
+																						  type="xs:long" use="required">
+																				<xs:annotation>
+																					<xs:documentation>Разность между
+																						суммой, указанной в платеже и
+																						сумм учета платежа.
+																						Целое число, показывающее
+																						остаток от суммы платежа с
+																						учетом частичного учета платежа.
+																					</xs:documentation>
+																				</xs:annotation>
+																			</xs:attribute>
+																		</xs:complexType>
+																	</xs:element>
+																</xs:sequence>
+																<xs:attribute name="serviceProvided"
+																			  use="required">
+																	<xs:annotation>
+																		<xs:documentation>Обозначение у платежа статуса
+																			"Услуга предоставлена"
+																		</xs:documentation>
+																	</xs:annotation>
+																	<xs:simpleType>
+																		<xs:restriction base="xs:string">
+																			<xs:length value="1"/>
+																		</xs:restriction>
+																	</xs:simpleType>
+																</xs:attribute>
+															</xs:complexType>
+														</xs:element>
+													</xs:choice>
+												</xs:complexType>
+											</xs:element>
+											<xs:element minOccurs="0" name="RefundInfo"
+														maxOccurs="20">
+												<xs:annotation>
+													<xs:documentation>Сведения о возвратах денежных средств.
+														Присутствует в ответе на запрос предоставления информации об
+														уплате в случае осуществления возврата денежных средств
+													</xs:documentation>
+												</xs:annotation>
+												<xs:complexType>
+													<xs:attribute name="refundId"
+																  type="com:RefundIdType" use="required">
+														<xs:annotation>
+															<xs:documentation>Уникальный идентификатор извещения о
+																возврате (УИВ)
+															</xs:documentation>
+														</xs:annotation>
+													</xs:attribute>
+													<xs:attribute name="amount" type="xs:unsignedLong"
+																  use="required">
+														<xs:annotation>
+															<xs:documentation>Сумма возврата</xs:documentation>
+														</xs:annotation>
+													</xs:attribute>
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="IncomeInfo" type="com:IncomeInfoType" minOccurs="0">
+												<xs:annotation>
+													<xs:documentation>Сведения о сопоставлении платежа и зачисления
+													</xs:documentation>
+												</xs:annotation>
+											</xs:element>
+										</xs:sequence>
+									</xs:extension>
+								</xs:complexContent>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="hasMore" type="xs:boolean" use="required">
+						<xs:annotation>
+							<xs:documentation>Признак конца выборки:
+								false - достигнут конец выборки;
+								true - после последнего предоставленного элемента в выборке имеются другие.
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

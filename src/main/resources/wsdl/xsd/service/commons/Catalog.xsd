@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+			xmlns:org="http://rnip.mos.ru/xsd/Organization/2.6.0"
+			xmlns:cat="http://rnip.mos.ru/xsd/Catalog/2.6.0"
+			targetNamespace="http://rnip.mos.ru/xsd/Catalog/2.6.0"
+			elementFormDefault="qualified">
+	<xsd:import namespace="http://rnip.mos.ru/xsd/Organization/2.6.0" schemaLocation="Organization.xsd"/>
+	<xsd:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0" schemaLocation="Common.xsd"/>
+	<xsd:complexType name="ServiceCatalogType">
+		<xsd:annotation>
+			<xsd:documentation>Тип, описывающий каталог услуг поставщика</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="Service" type="cat:ServiceType" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="Id" type="xsd:ID">
+			<xsd:annotation>
+				<xsd:documentation>Идентификатор, необходимый для наложения ЭП в формате XadES</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="name" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Наименование</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="revisionDate" type="xsd:date" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Дата последнего изменения каталога</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="version" type="xsd:token" default="1.0">
+			<xsd:annotation>
+				<xsd:documentation>Версия</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="ServiceType">
+		<xsd:annotation>
+			<xsd:documentation>Тип для описание услуги</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="ServiceCategory" type="cat:ServiceCategoryType">
+				<xsd:annotation>
+					<xsd:documentation>Категория услуги</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="PaymentParameters" type="cat:DescriptionParametersType" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Список параметров платежа, необходимых для принятия платежа по услуге
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="CurrenciesServices" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Коды валют, в которых возможна оплата услуги</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="CurrencyCode" type="com:CurrencyCodeType" maxOccurs="unbounded"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="Payee">
+				<xsd:annotation>
+					<xsd:documentation>Сведения о получателе средств</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:complexContent>
+						<xsd:extension base="org:OrganizationType">
+							<xsd:sequence>
+								<xsd:element ref="com:OrgAccount">
+									<xsd:annotation>
+										<xsd:documentation>Реквизиты счета организации</xsd:documentation>
+									</xsd:annotation>
+								</xsd:element>
+								<xsd:element ref="com:Address" minOccurs="0" maxOccurs="unbounded">
+									<xsd:annotation>
+										<xsd:documentation>Адрес организации</xsd:documentation>
+									</xsd:annotation>
+								</xsd:element>
+								<xsd:element ref="com:Contact" minOccurs="0" maxOccurs="unbounded">
+									<xsd:annotation>
+										<xsd:documentation>Контакты организации</xsd:documentation>
+									</xsd:annotation>
+								</xsd:element>
+							</xsd:sequence>
+							<xsd:attribute name="oktmo" type="com:OKTMOType" use="required"/>
+							<xsd:attribute name="subsystemId">
+								<xsd:annotation>
+									<xsd:documentation>Идентификатор подсистемы получателя средств</xsd:documentation>
+								</xsd:annotation>
+								<xsd:simpleType>
+									<xsd:restriction base="xsd:string">
+										<xsd:pattern value="0{2}[1-9]|0?[1-9][0-9]|[1-9][0-9][0-9]"/>
+									</xsd:restriction>
+								</xsd:simpleType>
+							</xsd:attribute>
+						</xsd:extension>
+					</xsd:complexContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="MinAmount" type="com:Money" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Минимальная сумма платежа по услуге</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="MaxAmount" type="com:Money" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Максимальная сумма платежа по услуге</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="Commissions" type="com:CommissionsType" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Комиссии по услуге</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="Regions" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Регионы, в которых предоставляется данная услуга</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Region" type="com:RegionType" maxOccurs="unbounded"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="Subservices" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Подуслуги</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="service" type="cat:ServiceType" maxOccurs="unbounded"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element ref="com:AdditionalData" minOccurs="0"/>
+		</xsd:sequence>
+		<xsd:attribute name="name" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Наименование услуги</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:minLength value="1"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="code" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Код услуги</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:length value="20"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="desc">
+			<xsd:annotation>
+				<xsd:documentation>Описание</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="512"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="expires" type="xsd:date">
+			<xsd:annotation>
+				<xsd:documentation>Дата до которой предоставляется услуга, если отсутствует, то услуга действует
+					постоянно
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="isActive" type="xsd:boolean" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Показывает доступность услуги:
+					true - доступна
+					false - не доступна
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="revisionDate" type="xsd:date">
+			<xsd:annotation>
+				<xsd:documentation>Дата внесения изменений</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="isSpecial" type="xsd:boolean"/>
+		<xsd:attribute name="paymentKind" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Вид оплаты:
+					1 – авансовый платеж;
+					2 – услуга может иметь одновременно два типа оплаты (авансовый платеж и оплата выставленного
+					поставщиком услуг счета);
+					3 – оплата выставленного поставщиком услуг счета.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:integer">
+					<xsd:totalDigits value="1"/>
+					<xsd:enumeration value="1">
+						<xsd:annotation>
+							<xsd:documentation>
+								авансовый платеж
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:enumeration>
+					<xsd:enumeration value="2">
+						<xsd:annotation>
+							<xsd:documentation>
+								выставленный счет
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:enumeration>
+					<xsd:enumeration value="3"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="ServiceCategoryType">
+		<xsd:annotation>
+			<xsd:documentation>Тип, описывающий категории услуг</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="code" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Код категории</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:minLength value="1"/>
+					<xsd:maxLength value="20"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="name">
+			<xsd:annotation>
+				<xsd:documentation>Наименование категории</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="128"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="DescriptionParameterType">
+		<xsd:attribute name="name" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Наименование параметра для отображения в ДБО</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="label" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Наименование параметра для отображения в интерфейсе ДБО</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="80"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="required" type="xsd:boolean" default="false">
+			<xsd:annotation>
+				<xsd:documentation>Указывает, является данный параметр обязательным для заполнения или нет
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="readonly" type="xsd:boolean" default="false">
+			<xsd:annotation>
+				<xsd:documentation>Указывает, что данный параметр не может быть изменен пользователем
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="supplierSrvCode">
+			<xsd:annotation>
+				<xsd:documentation>Код услуги в каталоге поставщика</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="40"/>
+					<xsd:minLength value="1"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="supplierID" type="com:UUID">
+			<xsd:annotation>
+				<xsd:documentation>Id поставщика, из каталога которого взята услуга</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="isId" type="xsd:integer">
+			<xsd:annotation>
+				<xsd:documentation>Указывает что данный параметр является идентификатором плательщика
+					0 - параметр определяет платеж в группе параметров с таким же значением isID
+					1 - параметр является уникальным, если присутствует несколько параметров с таким значением isID, то
+					для идентификации может использоваться любой параметр
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="visible" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation>Отображать параметр в интерфейсе пользователя или нет</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="forSearch" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation>Параметр используется при поиске</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="forPayment" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation>Параметр используется при платеже</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:element name="DescriptionSimpleParameter">
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="cat:DescriptionParameterType">
+					<xsd:sequence>
+						<xsd:element name="AllowedValues" type="cat:AllowedValuesType" minOccurs="0"/>
+					</xsd:sequence>
+					<xsd:attribute name="regexp">
+						<xsd:annotation>
+							<xsd:documentation>Маска для проверки значения параметра, в случае отсутствия проверка не
+								производится
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="200"/>
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:attribute>
+					<xsd:attribute name="defaultValue">
+						<xsd:annotation>
+							<xsd:documentation>Значение параметра по умолчанию</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="255"/>
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:complexType name="AllowedValuesType">
+		<xsd:sequence>
+			<xsd:element name="Value" type="com:ParamValueType" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:element name="DescriptionComplexParameter">
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="cat:DescriptionParameterType">
+					<xsd:sequence>
+						<xsd:element name="Field" type="cat:DescriptionFieldType" maxOccurs="unbounded"/>
+					</xsd:sequence>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:complexType name="DescriptionParametersType">
+		<xsd:choice maxOccurs="unbounded">
+			<xsd:element ref="cat:DescriptionSimpleParameter">
+				<xsd:annotation>
+					<xsd:documentation>Описание реквизитов услуги для ДБО</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element ref="cat:DescriptionComplexParameter">
+				<xsd:annotation>
+					<xsd:documentation>Комплексное описание реквизитов услуги для ДБО</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="DescriptionFieldType">
+		<xsd:sequence minOccurs="0">
+			<xsd:element name="AllowedValues" type="cat:AllowedValuesType" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Возможные значения для поля параметра (аналог перечисле­ния)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Наименование поля параметра</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="label" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Наименование поля параметра для отображения в интерфейсе ДБО</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="80"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="required" type="xsd:boolean" default="false">
+			<xsd:annotation>
+				<xsd:documentation>Указывает, является данное поле параметра обязательным для заполнения или нет
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="readonly" type="xsd:boolean" default="false">
+			<xsd:annotation>
+				<xsd:documentation>Указывает, что данное поле параметра не может быть изменено пользователем
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="visible" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation>Отображать поле в интерфейсе или нет</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="regexp">
+			<xsd:annotation>
+				<xsd:documentation>Маска для проверки значения поля параметра, в случае отсутствия проверка не
+					производится
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="200"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="defaultValue">
+			<xsd:annotation>
+				<xsd:documentation>Значение поля параметра по умолчанию</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="255"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:simpleType name="PayeeIDType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="6"/>
+			<xsd:whiteSpace value="collapse"/>
+			<xsd:maxLength value="32"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="ErrorType">
+		<xsd:annotation>
+			<xsd:documentation>Общий тип ошибки</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="code" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Код ошибки</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="80"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="errorMessage">
+			<xsd:annotation>
+				<xsd:documentation>Техт ошибки</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:minLength value="1"/>
+					<xsd:maxLength value="256"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:complexType>
+</xsd:schema>
