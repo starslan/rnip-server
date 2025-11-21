@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <!-- Сопоставление для SMEV схем -->
+    <system systemId="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/1.2"
+            uri="xsd/smev/smev-message-exchange-types-1.2.xsd"/>
+    <system systemId="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/basic/1.2"
+            uri="xsd/smev/smev-message-exchange-basic-1.2.xsd"/>
+    <system systemId="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/faults/1.2"
+            uri="xsd/smev/smev-message-exchange-faults-1.2.xsd"/>
+
+    <!-- Сопоставление для RNIP схем -->
+    <system systemId="http://rnip.mos.ru/xsd/Common/2.6.0"
+            uri="xsd/Common.xsd"/>
+    <system systemId="http://rnip.mos.ru/xsd/Charge/2.6.0"
+            uri="xsd/Charge.xsd"/>
+    <system systemId="http://rnip.mos.ru/xsd/Organization/2.6.0"
+            uri="xsd/Organization.xsd"/>
+    <system systemId="http://rnip.mos.ru/xsd/Package/2.6.0"
+            uri="xsd/Package.xsd"/>
+    <system systemId="urn://rnip.mos.ru/xsd/services/import-charges/2.6.0"
+            uri="xsd/ImportCharges.xsd"/>
+</catalog>

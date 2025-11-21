@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+		   targetNamespace="urn://rnip.mos.ru/xsd/services/SubscriptionService/2.6.0"
+		   xmlns:sub="http://rnip.mos.ru/xsd/Subscription/2.6.0">
+
+	<xs:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0"
+			   schemaLocation="commons/Common.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Subscription/2.6.0"
+			   schemaLocation="commons/Subscription.xsd"/>
+	<xs:element name="SubscriptionServiceRequest">
+		<xs:annotation>
+			<xs:documentation>Подписка на предоставление уведомлений из ИС РНиП.
+				Типы запросов:
+				1) запрос на предоставление перечня доступных участнику вариантов уведомлений для оформления подписки
+				2) запрос на оформление подписки (изменение, удаления подписки) с указанием при необходимости значений
+				параметров
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:RequestType">
+					<xs:choice>
+						<xs:element name="ExportSubscriptions" type="xs:boolean" fixed="true">
+							<xs:annotation>
+								<xs:documentation>Запрос на предоставление перечня доступных участнику вариантов
+									уведомлений
+								</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CreateSubscription">
+							<xs:annotation>
+								<xs:documentation>Запрос на оформление подписки на предоставление уведомлений (или
+									изменение, удаление подписки) с указанием значений параметров при необходимости
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:choice>
+										<xs:element name="SubscriptionCode" type="sub:SubscriptionCodeType">
+											<xs:annotation>
+												<xs:documentation>Код варианта уведомления. Указывается для новой
+													подписки (для статуса подписки "1")
+												</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element ref="sub:SubscriptionIdentifier">
+											<xs:annotation>
+												<xs:documentation>Идентификатор подписки, присвоенный в ИС РНиП.
+													Указывается при изменении или удалении подписки (статус подписки "2"
+													или "3")
+												</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:choice>
+									<xs:element name="SubscriptionParameters" type="sub:SubscriptionParametersType"
+												minOccurs="0" maxOccurs="250">
+										<xs:annotation>
+											<xs:documentation>Значения параметра (группы параметров) подписки
+											</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+								</xs:sequence>
+								<xs:attribute name="subscriptionStatus" use="required">
+									<xs:annotation>
+										<xs:documentation>Cтатус подписки к варианту уведомлений.
+											Возможные значения:
+											1-новая подписка,
+											2-изменение подписки,
+											3-удаление подписки
+										</xs:documentation>
+									</xs:annotation>
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:enumeration value="1"/>
+											<xs:enumeration value="2"/>
+											<xs:enumeration value="3"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:attribute>
+							</xs:complexType>
+						</xs:element>
+					</xs:choice>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SubscriptionServiceResponse">
+		<xs:annotation>
+			<xs:documentation>Ответ на запрос участника. Типы ответов:
+				1) предоставление перечня доступных участнику вариантов уведомлений
+				2) результат обработки запроса о подписке (изменении/удалении подписки) участника
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:ResponseType">
+					<xs:choice>
+						<xs:sequence>
+							<xs:element name="Subscriptions" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Ответ на запрос предоставления перечня доступных участнику
+										вариантов уведомлений
+									</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence minOccurs="0">
+										<xs:element name="SubscriptionParameter" maxOccurs="10">
+											<xs:annotation>
+												<xs:documentation>Перечень параметров, значения которых необходимо
+													указать при оформлении подписки
+												</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:attribute name="parameterCode" type="sub:ParameterCodeType"
+															  use="required">
+													<xs:annotation>
+														<xs:documentation>Код параметра</xs:documentation>
+													</xs:annotation>
+												</xs:attribute>
+												<xs:attribute name="parameterName" use="required">
+													<xs:annotation>
+														<xs:documentation>Наименование параметра</xs:documentation>
+													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:string">
+															<xs:maxLength value="100"/>
+														</xs:restriction>
+													</xs:simpleType>
+												</xs:attribute>
+												<xs:attribute name="parameterPattern">
+													<xs:annotation>
+														<xs:documentation>Формат параметра</xs:documentation>
+													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:string">
+															<xs:maxLength value="2000"/>
+														</xs:restriction>
+													</xs:simpleType>
+												</xs:attribute>
+												<xs:attribute name="required" use="required" type="xs:boolean">
+													<xs:annotation>
+														<xs:documentation>Признак обязательности параметра:
+															false - параметр необязательный;
+															true - параметр обязательный.
+														</xs:documentation>
+													</xs:annotation>
+												</xs:attribute>
+												<xs:attribute name="parameterDescription">
+													<xs:annotation>
+														<xs:documentation>Описание дополнительных ограничений для
+															значений параметра
+														</xs:documentation>
+													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:string">
+															<xs:maxLength value="2000"/>
+														</xs:restriction>
+													</xs:simpleType>
+												</xs:attribute>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+									<xs:attribute name="subscriptionCode" type="sub:SubscriptionCodeType"
+												  use="required">
+										<xs:annotation>
+											<xs:documentation>Код варианта уведомлений</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+									<xs:attribute name="subscriptionName" use="required">
+										<xs:annotation>
+											<xs:documentation>Наименование варианта</xs:documentation>
+										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="xs:string">
+												<xs:maxLength value="2000"/>
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:attribute>
+									<xs:attribute name="subscriptionOperation" use="required">
+										<xs:annotation>
+											<xs:documentation>Описание типа уведомления</xs:documentation>
+										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="xs:string">
+												<xs:maxLength value="2000"/>
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:attribute>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="CreateSubscriptionResult">
+							<xs:annotation>
+								<xs:documentation>Ответ с результатом обработки запроса о подписке (изменении/удалении
+									подписки) участника
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="SubscriptionProtocol" type="sub:SubscriptionProtocolType"
+												maxOccurs="250">
+										<xs:annotation>
+											<xs:documentation>Результат обработки запроса о подписке или
+												уточнения/удаления подписки
+											</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+								</xs:sequence>
+								<xs:attribute name="dispatchDate" type="xs:dateTime">
+									<xs:annotation>
+										<xs:documentation>Дата и время добавления/удаления подписки или изменения
+											значений параметров подписки
+										</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+								<xs:attribute name="expiryDate" type="xs:date">
+									<xs:annotation>
+										<xs:documentation>Дата автоматического окончания срока действия значений
+											параметров подписки в ИС РНиП
+										</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+								<xs:attribute name="subscriptionCode" type="sub:SubscriptionCodeType">
+									<xs:annotation>
+										<xs:documentation>Код варианта уведомлений</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+								<xs:attribute name="subscriptionIdentifier" type="sub:SubscriptionIdType">
+									<xs:annotation>
+										<xs:documentation>Идентификатор подписки</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+							</xs:complexType>
+						</xs:element>
+					</xs:choice>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+			targetNamespace="http://rnip.mos.ru/xsd/Quittance/2.6.0" elementFormDefault="qualified">
+	<xsd:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0" schemaLocation="Common.xsd"/>
+	<xsd:import namespace="http://rnip.mos.ru/xsd/Payment/2.6.0" schemaLocation="Payment.xsd"/>
+	<xsd:complexType name="QuittanceType">
+		<xsd:annotation>
+			<xsd:documentation>Квитанция</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence minOccurs="0">
+			<xsd:element ref="com:Discount" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Дополнительные условия оплаты
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="Refund" minOccurs="0" maxOccurs="20">
+				<xsd:annotation>
+					<xsd:documentation>Сведения о возврате денежных средств.
+						Присутствует в квитанции в случае осуществления возврата денежных средств по платежу, с которым
+						сквитировано
+						начисление
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:attribute name="refundId" type="com:RefundIdType" use="required">
+						<xsd:annotation>
+							<xsd:documentation>Уникальный идентификатор возврата (УИВ)</xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="amount" type="xsd:unsignedLong" use="required">
+						<xsd:annotation>
+							<xsd:documentation>Сумма возврата</xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="Income" minOccurs="0" maxOccurs="20">
+				<xsd:annotation>
+					<xsd:documentation>Сведения о зачислениях денежных средств.</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:attribute name="incomeId" type="com:IncomeIdType" use="required">
+						<xsd:annotation>
+							<xsd:documentation>Уникальный идентификатор зачисления (УИЗ)</xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="supplierBillID" use="required">
+			<xsd:annotation>
+				<xsd:documentation>УИН</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:union memberTypes="com:SupplierBillIDType">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string">
+							<xsd:pattern value="\d{15}"/>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:union>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="totalAmount" type="xsd:unsignedLong">
+			<xsd:annotation>
+				<xsd:documentation>Сумма, указанная в начислении</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="creationDate" type="xsd:dateTime" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Дата квитирования (создания квитанции)</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="billStatus" type="com:AcknowledgmentStatusType" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Статус, присвоенный начислению при создании квитанции
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="balance" type="xsd:long">
+			<xsd:annotation>
+				<xsd:documentation>Разность между суммой, указанной в начислении и суммой платежей с учетом возвратов.
+					Целое число, показывающее сумму в копейках.
+					Отрицательное значение информирует о переплате.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="paymentId" use="required">
+			<xsd:annotation>
+				<xsd:documentation>УПНО</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:union memberTypes="com:PaymentIdType">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string">
+							<xsd:enumeration value="PaymentNotLoaded"/>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:union>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="amountPayment" type="xsd:unsignedLong">
+			<xsd:annotation>
+				<xsd:documentation>Сумма, указанная в платеже</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="payeeINN" type="com:INNType">
+			<xsd:annotation>
+				<xsd:documentation>ИНН получателя средств (равен соответствующему значению из платежа).
+					Присутствует в квитанции в случае несовпадения значения этого реквизита в платеже и начислении.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="payeeKPP">
+			<xsd:annotation>
+				<xsd:documentation>КПП получателя средств (равен соответствующему значению из платежа).
+					Присутствует в квитанции в случае несовпадения значения этого реквизита в платеже и начислении.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:union memberTypes="com:KPPType xsd:string"/>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="kbk" type="com:KBKType">
+			<xsd:annotation>
+				<xsd:documentation>КБК (равен соответствующему значению из платежа).
+					Заполняется в случае несовпадения этого реквизита в данных платежа с данными начисления.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="oktmo" type="com:OKTMOType">
+			<xsd:annotation>
+				<xsd:documentation>Код по ОКТМО (равен соответствующему значению из платежа).
+					Присутствует в квитанции в случае несовпадения значения этого реквизита в платеже и начислении.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="payerIdentifier">
+			<xsd:annotation>
+				<xsd:documentation>Идентификатор плательщика (равен соответствующему значению из платежа).
+					Присутствует в квитанции в случае несовпадения значения этого реквизита в платеже и начислении.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="22"/>
+					<xsd:minLength value="1"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="accountNumber" type="com:AccountNumType">
+			<xsd:annotation>
+				<xsd:documentation>Номер счета получателя средств (равен соответствующему значению из платежа).
+					Присутствует в квитанции в случае несовпадения значения этого реквизита в платеже и начислении.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="bik" type="com:BIKType">
+			<xsd:annotation>
+				<xsd:documentation>БИК банка получателя средств (равен соответствующему значению из платежа).
+					Присутствует в квитанции в случае несовпадения значения этого реквизита в платеже и начислении.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="isRevoked" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation>Признак аннулирования квитанции:
+					true - квитанция аннулирована;
+					false - квитанция действующая
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="paymentPortal" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation>Признак уплаты с использованием ЕПГУ, РПГУ и иных порталов, интегрированных с ЕСИА
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+</xsd:schema>

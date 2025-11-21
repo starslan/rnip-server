@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+		   targetNamespace="urn://rnip.mos.ru/xsd/services/import-certificates/2.6.0"
+		   xmlns="urn://rnip.mos.ru/xsd/services/import-certificates/2.6.0">
+
+	<xs:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0" schemaLocation="commons/Common.xsd"/>
+	<xs:element name="ImportCertificateRequest">
+		<xs:annotation>
+			<xs:documentation>Запрос на прием информации о сертификате ключа проверки электронной подписи
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:RequestType">
+					<xs:sequence>
+						<xs:element maxOccurs="100" name="RequestEntry"
+									type="com:ImportCertificateEntryType">
+							<xs:annotation>
+								<xs:documentation>Информация о сертификате ключа проверки ЭП</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ImportCertificateResponse">
+		<xs:annotation>
+			<xs:documentation>Ответ на запрос приема информации о сертификате ключа проверки электронной подписи
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:ResponseType">
+					<xs:sequence>
+						<xs:element name="ImportProtocol" maxOccurs="100" type="com:ImportProtocolType">
+							<xs:annotation>
+								<xs:documentation>Результат обработки сущности в пакете</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

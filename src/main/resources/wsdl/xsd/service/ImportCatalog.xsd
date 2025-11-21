@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   targetNamespace="urn://rnip.mos.ru/xsd/services/import-catalog/2.6.0"
+		   xmlns:ctlg="http://rnip.mos.ru/xsd/Catalog/2.6.0"
+		   xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0">
+	<xs:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0" schemaLocation="commons/Common.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Catalog/2.6.0" schemaLocation="commons/Catalog.xsd"/>
+	<xs:element name="ImportCatalogRequest">
+		<xs:annotation>
+			<xs:documentation>Запрос на импорт каталога</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:RequestType">
+					<xs:choice>
+						<xs:element name="ServiceCatalog" type="ctlg:ServiceCatalogType">
+							<xs:annotation>
+								<xs:documentation>Каталог услуг поставщика</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:choice>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ImportCatalogResponse">
+		<xs:annotation>
+			<xs:documentation>Ответ на запрос приема информации о сертификате ключа проверки электронной подписи
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:ResponseType">
+					<xs:sequence>
+						<xs:element name="ImportProtocol" type="com:SingleImportProtocolType">
+							<xs:annotation>
+								<xs:documentation>Результат обработки</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

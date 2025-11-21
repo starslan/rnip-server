@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: rnip-server
+  datasource:
+    url: jdbc:postgresql://localhost:10432/rnip_server
+    password: admin
+    username: admin
+  liquibase:
+    enabled: true
+
+#  main:
+#    allow-bean-definition-overriding: true
+logging:
+  level:
+    root: info
+    org.springframework:
+      oxm.jaxb.Jaxb2Marshaller: trace
+      ws: trace

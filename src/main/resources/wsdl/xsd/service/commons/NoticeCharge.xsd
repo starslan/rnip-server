@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			xmlns:org="http://rnip.mos.ru/xsd/Organization/2.6.0"
+			xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+			xmlns:chg="http://rnip.mos.ru/xsd/Charge/2.6.0"
+			targetNamespace="http://rnip.mos.ru/xsd/NoticeCharge/2.6.0"
+			elementFormDefault="qualified">
+	<xsd:import namespace="http://rnip.mos.ru/xsd/Organization/2.6.0"
+				schemaLocation="Organization.xsd"/>
+	<xsd:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0" schemaLocation="Common.xsd"/>
+	<xsd:import namespace="http://rnip.mos.ru/xsd/Charge/2.6.0" schemaLocation="Charge.xsd"/>
+	<xsd:complexType name="NoticeChargeType">
+		<xsd:annotation>
+			<xsd:documentation>Данные уведомления о начислении</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="Payee">
+				<xsd:annotation>
+					<xsd:documentation>Сведения о получателе средств</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:complexContent>
+						<xsd:extension base="org:OrganizationType">
+							<xsd:sequence>
+								<xsd:element name="OrgAccount" type="com:AccountType" minOccurs="0">
+									<xsd:annotation>
+										<xsd:documentation>Реквизиты счета организации</xsd:documentation>
+									</xsd:annotation>
+								</xsd:element>
+							</xsd:sequence>
+							<xsd:attribute name="subsystemId">
+								<xsd:annotation>
+									<xsd:documentation>Идентификатор подсистемы получателя средств</xsd:documentation>
+								</xsd:annotation>
+								<xsd:simpleType>
+									<xsd:restriction base="xsd:string">
+										<xsd:pattern value="0{2}[1-9]|0?[1-9][0-9]|[1-9][0-9][0-9]"/>
+									</xsd:restriction>
+								</xsd:simpleType>
+							</xsd:attribute>
+						</xsd:extension>
+					</xsd:complexContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="Payer">
+				<xsd:annotation>
+					<xsd:documentation>Сведения о плательщике</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:complexContent>
+						<xsd:extension base="com:PayerType">
+							<xsd:attribute name="payerName">
+								<xsd:annotation>
+									<xsd:documentation>Плательщик</xsd:documentation>
+								</xsd:annotation>
+								<xsd:simpleType>
+									<xsd:restriction base="xsd:string">
+										<xsd:maxLength value="2000"/>
+										<xsd:pattern value="[\S\t ]*"/>
+									</xsd:restriction>
+								</xsd:simpleType>
+							</xsd:attribute>
+							<xsd:attribute name="additionalPayerIdentifier">
+								<xsd:annotation>
+									<xsd:documentation>Дополнительный идентификатор плательщика</xsd:documentation>
+								</xsd:annotation>
+								<xsd:simpleType>
+									<xsd:restriction base="com:PayerIdentifierType">
+										<xsd:pattern value="1((((0[1-9])|(1[0-5])|(2[12456789])|([34]0)|(9[1-9]))[0-9a-zA-Zа-яА-Я]{19})|(90(0){6,18}\d{1,13}))">
+											<xsd:annotation>
+												<xsd:documentation>Идентификатор ФЛ</xsd:documentation>
+											</xsd:annotation>
+										</xsd:pattern>
+										<xsd:pattern value="200\d{14}[A-Z0-9]{2}\d{3}">
+											<xsd:annotation>
+												<xsd:documentation>Идентификатор ЮЛ или ИП</xsd:documentation>
+											</xsd:annotation>
+										</xsd:pattern>
+										<xsd:pattern value="[23]00\d{10}[0]{9}"/>
+										<xsd:pattern value="300[0-9a-zA-Zа-яА-Я]{19}"/>
+										<xsd:pattern value="4[0]{9}\d{12}"/>
+									</xsd:restriction>
+								</xsd:simpleType>
+							</xsd:attribute>
+						</xsd:extension>
+					</xsd:complexContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="BudgetIndex" type="com:BudgetIndexType" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Дополнительные реквизиты платежа, предусмотренные приказом Минфина России от 12
+						ноября 2013 г. №107н
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element ref="chg:AdditionalOffense" minOccurs="0"/>
+			<xsd:element name="ChargeDetails" type="com:ChargeDetailsType" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Расширенная информация о подлежащей к уплате сумме средств</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element ref="com:ChangeStatus"/>
+			<xsd:element minOccurs="0" ref="com:Discount">
+				<xsd:annotation>
+					<xsd:documentation>Дополнительные условия оплаты</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="0" name="Service">
+				<xsd:complexType>
+					<xsd:attribute name="code" use="required">
+						<xsd:annotation>
+							<xsd:documentation>Код услуги</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="36"/>
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:attribute>
+					<xsd:attribute name="category" use="required">
+						<xsd:annotation>
+							<xsd:documentation>Код категории</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:minLength value="1"/>
+								<xsd:maxLength value="20"/>
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:attribute>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element ref="com:AdditionalData" minOccurs="0" maxOccurs="unbounded">
+				<xsd:annotation>
+					<xsd:documentation>Дополнительные поля начисления</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="supplierBillID" use="required">
+			<xsd:annotation>
+				<xsd:documentation>УИН</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="com:SupplierBillIDType">
+					<xsd:pattern value="(\w{20})|(\d{25})"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="billDate" type="xsd:dateTime" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Дата и время начисления суммы денежных средств, подлежащих уплате</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="validUntil" type="xsd:date">
+			<xsd:annotation>
+				<xsd:documentation>Дата, вплоть до которой актуально выставленное начисление</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="paymentTerm" type="xsd:date">
+			<xsd:annotation>
+				<xsd:documentation>Срок оплаты начисления в соответствии с нормативным правовым актом
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="totalAmount" type="xsd:unsignedLong" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Сумма начисления (в копейках)</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="purpose">
+			<xsd:annotation>
+				<xsd:documentation>Назначение платежа</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="210"/>
+					<xsd:pattern value="[\S\t ]*"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="kbk" type="com:KBKType" use="required">
+			<xsd:annotation>
+				<xsd:documentation>КБК</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="oktmo" type="com:OKTMOType" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Код по ОКТМО, указываемый АН или ГАН в соответствии с НПА</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="legalAct">
+			<xsd:annotation>
+				<xsd:documentation>Информация о нормативном правовом (правовом) акте, являющемся
+					основанием для
+					исчисления суммы денежных средств, подлежащих уплате
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="255"/>
+					<xsd:pattern value="\S+([\S\s]*\S+)*"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="chargeOffense" type="xsd:integer">
+			<xsd:annotation>
+				<xsd:documentation>Признак автоматической фиксации факта правонарушения, зафиксированного с применением
+					средств фото (видео) фиксации
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="amountToPay" type="xsd:long" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Остаток суммы подлежащей оплате, указанной в начислении (в
+					копейках). При переплате начисления принимает отрицательное значение; при
+					полной оплате — значение «0».
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="acknowledgmentStatus" type="com:AcknowledgmentStatusType">
+			<xsd:annotation>
+				<xsd:documentation>Статус, присвоенный начислению при создании квитанции
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="external" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation>Признак поступления уведомления из ГИС ГМП</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="NoticeChargeExecutiveType">
+		<xsd:annotation>
+			<xsd:documentation>Данные уведомления о начислении</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element ref="org:Payee"/>
+			<xsd:element name="Payer">
+				<xsd:annotation>
+					<xsd:documentation>Сведения о плательщике</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:complexContent>
+						<xsd:extension base="com:PayerType">
+							<xsd:attribute name="payerName" use="required">
+								<xsd:annotation>
+									<xsd:documentation>Плательщик</xsd:documentation>
+								</xsd:annotation>
+								<xsd:simpleType>
+									<xsd:restriction base="xsd:string">
+										<xsd:maxLength value="2000"/>
+										<xsd:pattern value="[\S\t ]*"/>
+									</xsd:restriction>
+								</xsd:simpleType>
+							</xsd:attribute>
+							<xsd:attribute name="additionalPayerIdentifier">
+								<xsd:annotation>
+									<xsd:documentation>Дополнительный идентификатор плательщика</xsd:documentation>
+								</xsd:annotation>
+								<xsd:simpleType>
+									<xsd:restriction base="com:PayerIdentifierType">
+										<xsd:pattern
+												value="(1((0[1-9])|(1[0-5])|(2[12456789])|([34]0)|(9[1-9]))[0-9a-zA-Zа-яА-Я]{19})|(200\d{14}[A-Z0-9]{2}\d{3})|300[0-9a-zA-Zа-яА-Я]{19}|(4[0]{9}\d{12})"
+										/>
+									</xsd:restriction>
+								</xsd:simpleType>
+							</xsd:attribute>
+						</xsd:extension>
+					</xsd:complexContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="BudgetIndex" type="com:BudgetIndexType">
+				<xsd:annotation>
+					<xsd:documentation>Дополнительные реквизиты платежа, предусмотренные приказом Минфина России от 12
+						ноября 2013 г. №107н
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ExecutiveProcedureInfo"
+						 type="com:ExecutiveProcedureInfoType">
+				<xsd:annotation>
+					<xsd:documentation>Информация, необходимая для осуществления исполнительного производства
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element ref="com:ChangeStatus"/>
+			<xsd:element minOccurs="0" ref="com:Discount">
+				<xsd:annotation>
+					<xsd:documentation>Дополнительные условия оплаты</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="supplierBillID" use="required">
+			<xsd:annotation>
+				<xsd:documentation>УИН</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="com:SupplierBillIDType">
+					<xsd:pattern value="(\w{20})|(\d{25})"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="billDate" type="xsd:dateTime" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Дата и время начисления суммы денежных средств, подлежащих уплате</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="validUntil" type="xsd:date">
+			<xsd:annotation>
+				<xsd:documentation>Дата, вплоть до которой актуально выставленное начисление</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="paymentTerm" type="xsd:date">
+			<xsd:annotation>
+				<xsd:documentation>Срок оплаты начисления в соответствии с нормативным правовым актом
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="totalAmount" type="xsd:unsignedLong" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Сумма начисления (в копейках)</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="purpose" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Назначение платежа</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="210"/>
+					<xsd:pattern value="[\S\t ]*"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="kbk" type="com:KBKType" use="required">
+			<xsd:annotation>
+				<xsd:documentation>КБК</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="oktmo" type="com:OKTMOType" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Код по ОКТМО, указываемый АН или ГАН в соответствии с НПА</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="legalAct">
+			<xsd:annotation>
+				<xsd:documentation>Информация о нормативном правовом (правовом) акте, являющемся
+					основанием для
+					исчисления суммы денежных средств, подлежащих уплате
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="255"/>
+					<xsd:pattern value="\S+([\S\s]*\S+)*"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="chargeOffense" type="xsd:integer">
+			<xsd:annotation>
+				<xsd:documentation>Признак автоматической фиксации факта правонарушения, зафиксированного с применением
+					средств фото (видео) фиксации
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="amountToPay" type="xsd:long" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Остаток суммы подлежащей оплате, указанной в начислении (в
+					копейках). При переплате начисления принимает отрицательное значение; при
+					полной оплате — значение «0».
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="acknowledgmentStatus" type="com:AcknowledgmentStatusType">
+			<xsd:annotation>
+				<xsd:documentation>Статус, присвоенный начислению при создании квитанции
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="external" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation>Признак поступления уведомления из ГИС ГМП</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+</xsd:schema>

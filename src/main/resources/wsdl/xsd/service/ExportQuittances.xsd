@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   xmlns:com="http://rnip.mos.ru/xsd/Common/2.6.0"
+		   xmlns:sc="http://rnip.mos.ru/xsd/SearchConditions/2.6.0"
+		   targetNamespace="urn://rnip.mos.ru/xsd/services/export-quittances/2.6.0"
+		   xmlns="urn://rnip.mos.ru/xsd/services/export-quittances/2.6.0"
+		   xmlns:qt="http://rnip.mos.ru/xsd/Quittance/2.6.0">
+	<xs:import namespace="http://rnip.mos.ru/xsd/Common/2.6.0" schemaLocation="commons/Common.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/SearchConditions/2.6.0"
+			   schemaLocation="commons/SearchConditions.xsd"/>
+	<xs:import namespace="http://rnip.mos.ru/xsd/Quittance/2.6.0" schemaLocation="commons/Quittance.xsd"/>
+	<xs:element name="ExportQuittancesRequest">
+		<xs:annotation>
+			<xs:documentation>Запрос на предоставление информации о результатах квитирования</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:ExportRequestType">
+					<xs:sequence>
+						<xs:element ref="sc:QuittancesExportConditions">
+							<xs:annotation>
+								<xs:documentation>Условия для предоставления информации о результатах квитирования
+								</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="external" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Внешний запрос в СМЭВ-3 (ГИС ГМП)</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ExportQuittancesResponse">
+		<xs:annotation>
+			<xs:documentation>Ответ на запрос предоставления информации о результатах квитирования</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="com:ResponseType">
+					<xs:sequence minOccurs="0">
+						<xs:element maxOccurs="100" name="Quittance" type="qt:QuittanceType"
+									minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Результат квитирования (квитанция)</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element maxOccurs="100" minOccurs="0" name="PossibleData">
+							<xs:annotation>
+								<xs:documentation>Информация о сопоставлении начислений с платежами. Предоставляется
+									только для запроса kind=ALLPOSSIBLE
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element maxOccurs="100" name="ComparisonResult">
+										<xs:annotation>
+											<xs:documentation>Результат сопоставления начисления с платежом
+											</xs:documentation>
+										</xs:annotation>
+										<xs:complexType>
+											<xs:attribute name="paymentId" use="required">
+												<xs:annotation>
+													<xs:documentation>УПНО, с которым сопоставлено начисление
+													</xs:documentation>
+												</xs:annotation>
+												<xs:simpleType>
+													<xs:union memberTypes="com:PaymentIdType">
+														<xs:simpleType>
+															<xs:restriction base="xs:string">
+																<xs:enumeration value="PaymentNotLoaded"/>
+															</xs:restriction>
+														</xs:simpleType>
+													</xs:union>
+												</xs:simpleType>
+											</xs:attribute>
+											<xs:attribute name="comparisonWeight"
+														  type="xs:unsignedLong" use="required">
+												<xs:annotation>
+													<xs:documentation>Вес сопоставления начисления с платежом
+													</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute name="comparisonDate" type="xs:dateTime">
+												<xs:annotation>
+													<xs:documentation>Дата сопоставления</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute name="amountPayment"
+														  type="xs:unsignedLong">
+												<xs:annotation>
+													<xs:documentation>Сумма, указанная в платеже</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute name="kbk" type="com:KBKType">
+												<xs:annotation>
+													<xs:documentation>КБК, указанный в платеже. Присутствует в
+														результате сопоставления в случае несовпадения значений этого
+														реквизита в данных платежа и начисления.
+													</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute name="oktmo" type="com:OKTMOType">
+												<xs:annotation>
+													<xs:documentation>Код по ОКТМО, указанный в платеже. Присутствует в
+														результате сопоставления в случае несовпадения значений этого
+														реквизита в данных платежа и начисления.
+													</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute name="accountNumber"
+														  type="com:AccountNumType">
+												<xs:annotation>
+													<xs:documentation>Номер счета получателя средств, указанный в
+														платеже. Присутствует в результате сопоставления в случае
+														несовпадения значений этого реквизита в данных платежа и
+														начисления.
+													</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute name="bik" type="com:BIKType">
+												<xs:annotation>
+													<xs:documentation>БИК банка получателя средств, указанный в платеже.
+														Присутствует в результате сопоставления в случае несовпадения
+														значений этого реквизита в данных платежа и начисления.
+													</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+								<xs:attribute name="supplierBillID" type="com:SupplierBillIDType"
+											  use="required">
+									<xs:annotation>
+										<xs:documentation>УИН, с которым сопоставлены платежи</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+								<xs:attribute name="totalAmount" type="xs:unsignedLong">
+									<xs:annotation>
+										<xs:documentation>Сумма, указанная в начислении</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="hasMore" type="xs:boolean" use="required">
+						<xs:annotation>
+							<xs:documentation>Признак конца выборки:
+								false - достигнут конец выборки;
+								true - после последнего предоставленного элемента в выборке имеются другие.
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
