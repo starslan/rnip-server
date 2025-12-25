@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-create-budget-index
+      author: rstarostenko
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: budget_index
+      changes:
+        - createTable:
+            tableName: budget_index
+            remarks: "Бюджетные реквизиты платежа (107н)"
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: status
+                  type: VARCHAR(2)
+                  remarks: "Статус плательщика"
+              - column:
+                  name: pay_reason
+                  type: VARCHAR(2)
+                  remarks: "Основание платежа"
+              - column:
+                  name: tax_period
+                  type: VARCHAR(10)
+                  remarks: "Налоговый период"
+              - column:
+                  name: doc_number
+                  type: VARCHAR(15)
+                  remarks: "Номер документа-основания"
+              - column:
+                  name: doc_date
+                  type: DATE
+                  remarks: "Дата документа-основания"

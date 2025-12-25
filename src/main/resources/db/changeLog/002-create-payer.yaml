@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-payer
+      author: rstarostenko
+      changes:
+        - createTable:
+            tableName: payer
+            remarks: "Плательщик"
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: payer_type
+                  type: VARCHAR(20)
+                  remarks: "Тип плательщика (ФЛ / ЮЛ / ИП)"
+              - column:
+                  name: payer_name
+                  type: VARCHAR(2000)
+                  remarks: "ФИО или наименование плательщика"
+              - column:
+                  name: payer_identifier
+                  type: VARCHAR(30)
+                  remarks: "Основной идентификатор плательщика"
+              - column:
+                  name: additional_payer_identifier
+                  type: VARCHAR(30)
+                  remarks: "Дополнительный идентификатор плательщика"

@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-create-charge-additional-data
+      author: rstarostenko
+      changes:
+        - createTable:
+            tableName: charge_additional_data
+            remarks: "Дополнительные поля начисления"
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: charge_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: TEXT
+
+        - addForeignKeyConstraint:
+            constraintName: fk_charge_additional_data_charge
+            baseTableName: charge_additional_data
+            baseColumnNames: charge_id
+            referencedTableName: charge
+            referencedColumnNames: id
+            onDelete: CASCADE

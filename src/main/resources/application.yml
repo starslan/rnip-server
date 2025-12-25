@@ -2,11 +2,12 @@ spring:
   application:
     name: rnip-server
   datasource:
-    url: jdbc:postgresql://localhost:10432/rnip_server
-    password: admin
-    username: admin
+    url: jdbc:postgresql://localhost:6432/rnip_db
+    password: rnip_password
+    username: rnip_user
   liquibase:
     enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
 
 #  main:
 #    allow-bean-definition-overriding: true
