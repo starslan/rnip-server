@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-create-charge-discount
+      author: rstarostenko
+      changes:
+        - createTable:
+            tableName: charge_discount
+            remarks: "Скидки по начислению"
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: charge_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discount_size
+                  type: BIGINT
+                  remarks: "Размер скидки в копейках"
+              - column:
+                  name: discount_until
+                  type: DATE
+                  remarks: "Дата окончания действия скидки"
+
+        - addForeignKeyConstraint:
+            constraintName: fk_charge_discount_charge
+            baseTableName: charge_discount
+            baseColumnNames: charge_id
+            referencedTableName: charge
+            referencedColumnNames: id
+            onDelete: CASCADE

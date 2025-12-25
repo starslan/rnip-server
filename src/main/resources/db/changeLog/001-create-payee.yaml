@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-payee
+      author: rstarostenko
+      changes:
+        - createTable:
+            tableName: payee
+            remarks: "Получатель средств"
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(500)
+                  remarks: "Наименование организации"
+              - column:
+                  name: inn
+                  type: VARCHAR(12)
+                  remarks: "ИНН получателя"
+              - column:
+                  name: kpp
+                  type: VARCHAR(9)
+                  remarks: "КПП получателя"
+              - column:
+                  name: ogrn
+                  type: VARCHAR(13)
+                  remarks: "ОГРН получателя"
+              - column:
+                  name: account
+                  type: VARCHAR(25)
+                  remarks: "Расчётный счёт"
+              - column:
+                  name: bank_name
+                  type: VARCHAR(255)
+                  remarks: "Наименование банка"

@@ -1,0 +1,134 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-charge
+      author: rstarostenko
+      changes:
+        - createTable:
+            tableName: charge
+            remarks: "Начисление (Charge)"
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: supplier_bill_id
+                  type: VARCHAR(25)
+                  remarks: "УИН начисления"
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: bill_date
+                  type: TIMESTAMP WITH TIME ZONE
+                  remarks: "Дата и время выставления начисления"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: valid_until
+                  type: DATE
+                  remarks: "Дата, до которой начисление актуально"
+              - column:
+                  name: total_amount
+                  type: BIGINT
+                  remarks: "Сумма начисления в копейках"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: purpose
+                  type: VARCHAR(210)
+                  remarks: "Назначение платежа"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: kbk
+                  type: VARCHAR(20)
+                  remarks: "КБК"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: oktmo
+                  type: VARCHAR(11)
+                  remarks: "Код ОКТМО"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: delivery_date
+                  type: DATE
+                  remarks: "Дата направления начисления плательщику"
+              - column:
+                  name: legal_act
+                  type: VARCHAR(255)
+                  remarks: "Нормативный правовой акт"
+              - column:
+                  name: payment_term
+                  type: DATE
+                  remarks: "Срок оплаты начисления"
+              - column:
+                  name: origin
+                  type: VARCHAR(10)
+                  remarks: "PRIOR / TEMP"
+              - column:
+                  name: notice_term
+                  type: INT
+                  remarks: "Количество дней до повторного уведомления"
+              - column:
+                  name: okved
+                  type: VARCHAR(10)
+                  remarks: "Код ОКВЭД"
+              - column:
+                  name: charge_offense
+                  type: BOOLEAN
+                  remarks: "Признак административного правонарушения"
+              - column:
+                  name: payee_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payer_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: budget_index_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: executive_proc_info_id
+                  type: BIGINT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: now()
+                  remarks: "Дата создания записи"
+
+        - addForeignKeyConstraint:
+            constraintName: fk_charge_payee
+            baseTableName: charge
+            baseColumnNames: payee_id
+            referencedTableName: payee
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            constraintName: fk_charge_payer
+            baseTableName: charge
+            baseColumnNames: payer_id
+            referencedTableName: payer
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            constraintName: fk_charge_budget_index
+            baseTableName: charge
+            baseColumnNames: budget_index_id
+            referencedTableName: budget_index
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            constraintName: fk_charge_exec_proc_info
+            baseTableName: charge
+            baseColumnNames: executive_proc_info_id
+            referencedTableName: executive_procedure_info
+            referencedColumnNames: id

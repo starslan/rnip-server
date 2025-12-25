@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-create-charge-linked
+      author: rstarostenko
+      changes:
+        - createTable:
+            tableName: charge_linked
+            remarks: "Связанные начисления"
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: charge_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: linked_supplier_id
+                  type: VARCHAR(25)
+                  remarks: "УИН связанного начисления"
+
+        - addForeignKeyConstraint:
+            constraintName: fk_charge_linked_charge
+            baseTableName: charge_linked
+            baseColumnNames: charge_id
+            referencedTableName: charge
+            referencedColumnNames: id
+            onDelete: CASCADE
