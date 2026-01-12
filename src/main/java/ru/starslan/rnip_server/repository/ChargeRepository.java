@@ -18,10 +18,10 @@ public class ChargeRepository {
 
     public Long insertCharge(ChargeDTO chargeDTO) {
         String insertSql = "INSERT INTO charge (" +
-                "supplier_bill_id, bill_date, valid_until, total_amount, purpose, " +
-                "kbk, oktmo, delivery_date, legal_act, payment_term, origin, " +
-                "notice_term, okved, charge_offense, payee_id, payer_id, " +
-                "budget_index_id, executive_proc_info_id" +
+                    "supplier_bill_id, bill_date, valid_until, total_amount, purpose, " +
+                    "kbk, oktmo, delivery_date, legal_act, payment_term, origin, " +
+                    "notice_term, okved, charge_offense, payee_id, payer_id, " +
+                    "budget_index_id, executive_proc_info_id" +
                 ") VALUES (:supplierBillId, :billDate, :validUntil, :totalAmount, :purpose, " +
                 ":kbk, :oktmo, :deliveryDate, :legalAct, :paymentTerm, :origin, " +
                 ":noticeTerm, :okved, :chargeOffense, :payeeId, :payerId, " +
