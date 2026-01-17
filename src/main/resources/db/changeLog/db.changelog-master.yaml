@@ -26,3 +26,6 @@ databaseChangeLog:
   - include:
       file: 009-create-charge-additional-data.yaml
       relativeToChangelogFile: true
+  - include:
+      file: 010-create-payment.yaml
+      relativeToChangelogFile: true

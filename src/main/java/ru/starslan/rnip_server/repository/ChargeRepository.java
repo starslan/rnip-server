@@ -1,5 +1,6 @@
 package ru.starslan.rnip_server.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -7,6 +8,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.starslan.rnip_server.dto.ChargeDTO;
 
+@Slf4j
 @Repository
 public class ChargeRepository {
 
@@ -15,8 +17,21 @@ public class ChargeRepository {
     public ChargeRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
+    
+    public boolean existsBySupplierBillId(String supplierBillId) {
+        String sql = "SELECT COUNT(*) FROM charge WHERE supplier_bill_id = :supplierBillId";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("supplierBillId", supplierBillId);
+        
+        Integer count = namedParameterJdbcTemplate.queryForObject(sql, params, Integer.class);
+        boolean exists = count != null && count > 0;
+        log.debug("Проверка существования начисления с УИН {}: {}", supplierBillId, exists);
+        return exists;
+    }
 
     public Long insertCharge(ChargeDTO chargeDTO) {
+        log.info("Сохранение начисления с УИН: {}", chargeDTO.getSupplierBillId());
+        
         String insertSql = "INSERT INTO charge (" +
                     "supplier_bill_id, bill_date, valid_until, total_amount, purpose, " +
                     "kbk, oktmo, delivery_date, legal_act, payment_term, origin, " +
@@ -38,7 +53,7 @@ public class ChargeRepository {
                 .addValue("deliveryDate", chargeDTO.getDeliveryDate())
                 .addValue("legalAct", chargeDTO.getLegalAct())
                 .addValue("paymentTerm", chargeDTO.getPaymentTerm())
-                .addValue("origin", chargeDTO.getOrigin())
+                .addValue("origin", chargeDTO.getOrigin() != null ? chargeDTO.getOrigin().getCode() : null)
                 .addValue("noticeTerm", chargeDTO.getNoticeTerm())
                 .addValue("okved", chargeDTO.getOkved())
                 .addValue("chargeOffense", chargeDTO.getChargeOffense() != null && chargeDTO.getChargeOffense())
@@ -52,6 +67,8 @@ public class ChargeRepository {
         namedParameterJdbcTemplate.update(insertSql, params, keyHolder, new String[]{"id"});
 
         Number key = keyHolder.getKey();
-        return key.longValue();
+        Long chargeId = key.longValue();
+        log.info("Начисление с УИН {} успешно сохранено с ID: {}", chargeDTO.getSupplierBillId(), chargeId);
+        return chargeId;
     }
 }

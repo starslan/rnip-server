@@ -1,0 +1,173 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-create-payment
+      author: rstarostenko
+      changes:
+        - createTable:
+            tableName: payment
+            remarks: "Платеж (Payment)"
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: payment_id
+                  type: VARCHAR(32)
+                  remarks: "УПНО"
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: payment_date
+                  type: TIMESTAMP WITH TIME ZONE
+                  remarks: "Дата приема к исполнению распоряжения плательщика"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: BIGINT
+                  remarks: "Сумма платежа в копейках"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: trans_kind
+                  type: VARCHAR(2)
+                  remarks: "Вид операции (шифр платежного документа)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: supplier_bill_id
+                  type: VARCHAR(25)
+                  remarks: "УИН"
+              - column:
+                  name: purpose
+                  type: VARCHAR(210)
+                  remarks: "Назначение платежа"
+              - column:
+                  name: receipt_date
+                  type: DATE
+                  remarks: "Дата поступления распоряжения в банк плательщика"
+              - column:
+                  name: kbk
+                  type: VARCHAR(20)
+                  remarks: "КБК"
+              - column:
+                  name: oktmo
+                  type: VARCHAR(11)
+                  remarks: "Код ОКТМО"
+              - column:
+                  name: delivery_date
+                  type: DATE
+                  remarks: "Дата отсылки (вручения) плательщику документа с начислением"
+              - column:
+                  name: esia_id
+                  type: VARCHAR(255)
+                  remarks: "Идентификатор учетной записи пользователя в ЕСИА"
+              - column:
+                  name: acc_doc_no
+                  type: VARCHAR(15)
+                  remarks: "Номер платежного документа"
+              - column:
+                  name: acc_doc_date
+                  type: DATE
+                  remarks: "Дата платежного документа"
+              - column:
+                  name: change_status_meaning
+                  type: VARCHAR(1)
+                  remarks: "Статус платежа (1-новый, 2-уточнение, 3-аннулирование, 4-деаннулирование)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: change_status_change_date
+                  type: TIMESTAMP WITH TIME ZONE
+                  remarks: "Дата и время уточнения информации"
+              - column:
+                  name: change_status_reason
+                  type: VARCHAR(512)
+                  remarks: "Основание изменения статуса"
+              - column:
+                  name: payment_org_type
+                  type: VARCHAR(20)
+                  remarks: "Тип организации, принявшей платеж (Bank/UFK/Other)"
+              - column:
+                  name: payment_org_bik
+                  type: VARCHAR(9)
+                  remarks: "БИК организации, принявшей платеж"
+              - column:
+                  name: payment_org_name
+                  type: VARCHAR(160)
+                  remarks: "Наименование организации, принявшей платеж"
+              - column:
+                  name: payment_org_account
+                  type: VARCHAR(20)
+                  remarks: "Корреспондентский счет организации, принявшей платеж"
+              - column:
+                  name: payment_org_ufk
+                  type: VARCHAR(36)
+                  remarks: "Код ТОФК/УРН ТОФК"
+              - column:
+                  name: payer_name
+                  type: VARCHAR(2000)
+                  remarks: "Плательщик"
+              - column:
+                  name: payer_account
+                  type: VARCHAR(20)
+                  remarks: "Номер счета плательщика в организации, принявшей платеж"
+              - column:
+                  name: payer_identifier
+                  type: VARCHAR(50)
+                  remarks: "Идентификатор плательщика"
+              - column:
+                  name: charge_id
+                  type: BIGINT
+                  remarks: "Связь с начислением"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payee_id
+                  type: BIGINT
+                  remarks: "Связь с получателем средств"
+              - column:
+                  name: payer_id
+                  type: BIGINT
+                  remarks: "Связь с плательщиком"
+              - column:
+                  name: budget_index_id
+                  type: BIGINT
+                  remarks: "Связь с бюджетными реквизитами"
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: now()
+                  remarks: "Дата создания записи"
+
+        - addForeignKeyConstraint:
+            constraintName: fk_payment_charge
+            baseTableName: payment
+            baseColumnNames: charge_id
+            referencedTableName: charge
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            constraintName: fk_payment_payee
+            baseTableName: payment
+            baseColumnNames: payee_id
+            referencedTableName: payee
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            constraintName: fk_payment_payer
+            baseTableName: payment
+            baseColumnNames: payer_id
+            referencedTableName: payer
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            constraintName: fk_payment_budget_index
+            baseTableName: payment
+            baseColumnNames: budget_index_id
+            referencedTableName: budget_index
+            referencedColumnNames: id

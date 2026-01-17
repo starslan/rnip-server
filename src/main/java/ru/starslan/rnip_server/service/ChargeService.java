@@ -1,8 +1,12 @@
 package ru.starslan.rnip_server.service;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.starslan.rnip_server.dto.*;
+import ru.starslan.rnip_server.model.ChargeOrigin;
 import ru.starslan.rnip_server.model.PayerType;
 import ru.starslan.rnip_server.repository.*;
 
@@ -10,7 +14,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.Set;
 
+@Slf4j
 @Service
 public class ChargeService {
 
@@ -19,6 +25,8 @@ public class ChargeService {
     private final PayerRepository payerRepository;
     private final BudgetIndexRepository budgetIndexRepository;
     private final ExecutiveProcedureInfoRepository executiveProcedureInfoRepository;
+    private final PaymentService paymentService;
+    private final Validator validator;
 
     @Autowired
     public ChargeService(
@@ -26,21 +34,29 @@ public class ChargeService {
             PayeeRepository payeeRepository,
             PayerRepository payerRepository,
             BudgetIndexRepository budgetIndexRepository,
-            ExecutiveProcedureInfoRepository executiveProcedureInfoRepository
+            ExecutiveProcedureInfoRepository executiveProcedureInfoRepository,
+            PaymentService paymentService,
+            Validator validator
     ) {
         this.chargeRepository = chargeRepository;
         this.payeeRepository = payeeRepository;
         this.payerRepository = payerRepository;
         this.budgetIndexRepository = budgetIndexRepository;
         this.executiveProcedureInfoRepository = executiveProcedureInfoRepository;
+        this.paymentService = paymentService;
+        this.validator = validator;
     }
 
     public void saveCharge(Object importedCharge) throws Exception {
-        // Используем рефлексию для доступа к JAXB объектам
-        // Предполагаем стандартную структуру JAXB классов
-        
-        // Получаем основные атрибуты начисления
+
         String supplierBillId = getValue(importedCharge, "getSupplierBillID");
+        log.debug("Получен УИН начисления: {}", supplierBillId);
+        
+        if (supplierBillId != null && chargeRepository.existsBySupplierBillId(supplierBillId)) {
+            String errorMessage = String.format("Начисление с УИН %s уже существует", supplierBillId);
+            log.warn(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
         XMLGregorianCalendar billDateXml = getValue(importedCharge, "getBillDate");
         XMLGregorianCalendar validUntilXml = getValue(importedCharge, "getValidUntil");
         BigInteger totalAmountBig = getValue(importedCharge, "getTotalAmount");
@@ -50,12 +66,19 @@ public class ChargeService {
         XMLGregorianCalendar deliveryDateXml = getValue(importedCharge, "getDeliveryDate");
         String legalAct = getValue(importedCharge, "getLegalAct");
         XMLGregorianCalendar paymentTermXml = getValue(importedCharge, "getPaymentTerm");
-        String origin = getValue(importedCharge, "getOrigin");
+        String originStr = getValue(importedCharge, "getOrigin");
+        ChargeOrigin origin = null;
+        if (originStr != null && !originStr.isEmpty()) {
+            try {
+                origin = ChargeOrigin.fromCode(originStr);
+            } catch (IllegalArgumentException e) {
+                log.warn("Неизвестное значение origin '{}', будет сохранено как null", originStr);
+            }
+        }
         BigInteger noticeTermBig = getValue(importedCharge, "getNoticeTerm");
         String okved = getValue(importedCharge, "getOKVED");
         Boolean chargeOffense = getValue(importedCharge, "getChargeOffense");
 
-        // Конвертируем даты
         Timestamp billDate = billDateXml != null ? Timestamp.from(billDateXml.toGregorianCalendar().toZonedDateTime().toInstant()) : null;
         Date validUntil = validUntilXml != null ? new Date(validUntilXml.toGregorianCalendar().getTimeInMillis()) : null;
         Date deliveryDate = deliveryDateXml != null ? new Date(deliveryDateXml.toGregorianCalendar().getTimeInMillis()) : null;
@@ -63,23 +86,21 @@ public class ChargeService {
         Long totalAmount = totalAmountBig != null ? totalAmountBig.longValue() : null;
         Integer noticeTerm = noticeTermBig != null ? noticeTermBig.intValue() : null;
 
-        // Получаем Payee
         Object payee = getValue(importedCharge, "getPayee");
         Long payeeId = savePayee(payee);
 
-        // Получаем Payer
         Object payer = getValue(importedCharge, "getPayer");
         Long payerId = savePayer(payer);
+        
+        String payerIdentifier = getValue(payer, "getPayerIdentifier");
+        String payerName = getValue(payer, "getPayerName");
 
-        // Получаем BudgetIndex
         Object budgetIndex = getValue(importedCharge, "getBudgetIndex");
         Long budgetIndexId = saveBudgetIndex(budgetIndex);
 
-        // Получаем ExecutiveProcedureInfo (опционально)
         Object execProcInfo = getValue(importedCharge, "getExecutiveProcedureInfo");
         Long execProcInfoId = execProcInfo != null ? saveExecutiveProcedureInfo(execProcInfo) : null;
 
-        // Создаем DTO для начисления
         ChargeDTO chargeDTO = new ChargeDTO(
                 supplierBillId,
                 billDate,
@@ -101,8 +122,26 @@ public class ChargeService {
                 execProcInfoId
         );
 
-        // Сохраняем начисление
-        chargeRepository.insertCharge(chargeDTO);
+        Set<ConstraintViolation<ChargeDTO>> violations = validator.validate(chargeDTO);
+        if (!violations.isEmpty()) {
+            StringBuilder errorMessage = new StringBuilder("Ошибки валидации данных начисления с УИН ").append(supplierBillId).append(": ");
+            for (ConstraintViolation<ChargeDTO> violation : violations) {
+                errorMessage.append(violation.getPropertyPath()).append(" - ").append(violation.getMessage()).append("; ");
+            }
+            log.error(errorMessage.toString());
+            throw new IllegalArgumentException(errorMessage.toString());
+        }
+        
+        log.debug("Валидация начисления с УИН {} прошла успешно", supplierBillId);
+
+        Long chargeId = chargeRepository.insertCharge(chargeDTO);
+        
+        try {
+            Long paymentId = paymentService.generatePaymentForCharge(chargeDTO, chargeId, payerIdentifier, payerName);
+            log.info("Платеж успешно сгенерирован для начисления с УИН {}, ID платежа: {}", supplierBillId, paymentId);
+        } catch (Exception e) {
+            log.error("Ошибка при генерации платежа для начисления с УИН {}: {}", supplierBillId, e.getMessage(), e);
+        }
     }
 
     private Long savePayee(Object payee) throws Exception {
@@ -115,7 +154,6 @@ public class ChargeService {
         String kpp = getValue(payee, "getKpp");
         String ogrn = getValue(payee, "getOgrn");
 
-        // Получаем OrgAccount
         Object orgAccount = getValue(payee, "getOrgAccount");
         String account = null;
         String bankName = null;
@@ -140,7 +178,6 @@ public class ChargeService {
         String payerName = getValue(payer, "getPayerName");
         String additionalPayerIdentifier = getValue(payer, "getAdditionalPayerIdentifier");
         
-        // Определяем тип плательщика по идентификатору
         PayerType payerType = determinePayerType(payerIdentifier);
 
         PayerDTO payerDTO = new PayerDTO(payerType, payerName, payerIdentifier, additionalPayerIdentifier);
@@ -158,7 +195,7 @@ public class ChargeService {
         } else if (payerIdentifier.startsWith("3")) {
             return PayerType.ENTREPRENEUR;
         }
-        return PayerType.INDIVIDUAL; // по умолчанию
+        return PayerType.INDIVIDUAL;
     }
 
     private Long saveBudgetIndex(Object budgetIndex) throws Exception {
@@ -182,7 +219,6 @@ public class ChargeService {
             return null;
         }
 
-        // Получаем DeedInfo
         Object deedInfo = getValue(execProcInfo, "getDeedInfo");
         String execDocNumber = null;
         Date execDocDate = null;
@@ -192,16 +228,14 @@ public class ChargeService {
             execDocDate = execDocDateXml != null ? new Date(execDocDateXml.toGregorianCalendar().getTimeInMillis()) : null;
         }
 
-        // Получаем ExecutOrgan
-        Object executOrgan = getValue(execProcInfo, "getExecutOrgan");
+        Object executeOrgan = getValue(execProcInfo, "getExecutOrgan");
         String bailiffDept = null;
-        if (executOrgan != null) {
-            // Получаем название подразделения органа
-            bailiffDept = getValue(executOrgan, "getOrgan");
+        if (executeOrgan != null) {
+            bailiffDept = getValue(executeOrgan, "getOrgan");
         }
 
         if (execDocNumber == null || execDocDate == null) {
-            return null; // Если нет обязательных данных, не сохраняем
+            return null;
         }
 
         ExecutiveProcedureInfoDTO execProcInfoDTO = new ExecutiveProcedureInfoDTO(execDocNumber, execDocDate, bailiffDept);

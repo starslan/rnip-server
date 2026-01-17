@@ -1,5 +1,6 @@
 package ru.starslan.rnip_server.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.gov.smev.jaxb.*;
@@ -9,6 +10,7 @@ import ru.starslan.rnip_server.exceptions.ContentNotFound;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class HandleMessagePrimaryContent implements HandleContent {
     
@@ -19,7 +21,7 @@ public class HandleMessagePrimaryContent implements HandleContent {
     public SendRequestResponse handle(MessagePrimaryContent mpc) throws ContentNotFound {
 
         if (mpc.getImportChargesRequest() != null) {
-            System.out.println("Пришел ImportChargesRequest");
+            log.info("Получен запрос ImportChargesRequest");
             return handleImportCharges(mpc.getImportChargesRequest());
         }
 
@@ -40,20 +42,30 @@ public class HandleMessagePrimaryContent implements HandleContent {
             if (chargesPackage != null) {
                 List<Object> importedCharges = getValue(chargesPackage, "getImportedCharge");
                 if (importedCharges != null) {
+                    log.info("Получено начислений для обработки: {}", importedCharges.size());
+                    int successCount = 0;
+                    int errorCount = 0;
+                    
                     for (Object importedCharge : importedCharges) {
                         try {
+                            String supplierBillId = getValue(importedCharge, "getSupplierBillID");
                             chargeService.saveCharge(importedCharge);
-                            System.out.println("Charge saved success: " + getValue(importedCharge, "getSupplierBillID"));
+                            log.info("Начисление с УИН {} успешно сохранено", supplierBillId);
+                            successCount++;
                         } catch (Exception e) {
-                            System.err.println("Charge saved error " + e.getMessage());
-                            e.printStackTrace();
+                            String supplierBillId = getValue(importedCharge, "getSupplierBillID");
+                            log.error("Ошибка при сохранении начисления с УИН {}: {}", supplierBillId, e.getMessage(), e);
+                            errorCount++;
                         }
                     }
+                    
+                    log.info("Обработка начислений завершена. Успешно: {}, Ошибок: {}", successCount, errorCount);
+                } else {
+                    log.warn("В запросе ImportChargesRequest отсутствуют начисления для обработки");
                 }
             }
         } catch (Exception e) {
-            System.err.println("Charge error from ImportChargesRequest: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Ошибка при обработке ImportChargesRequest: {}", e.getMessage(), e);
         }
 
         return response;
